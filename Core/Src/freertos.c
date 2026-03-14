@@ -1,0 +1,223 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * File Name          : freertos.c
+  * Description        : Code for freertos applications
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2026 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                             www.st.com/SLA0044
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "FreeRTOS.h"
+#include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "task_led.h"    // 引入 LED 业务
+//#include "task_buzzer.h" // 引入 蜂鸣器 业务
+#include "task_panel.h"  // 引入 面板 业务
+#include "task_rs485_log.h"// 引入 通信 业务
+#include "task_XKC_Y20_V.h"// 引入 XKC_Y20_V 传感器业务
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN Variables */
+
+/* USER CODE END Variables */
+osThreadId Task_LEDHandle;
+osThreadId Task_RS485Handle;
+osThreadId TaskPanelHandle;
+osThreadId Task_XKCHandle;
+osMessageQId ModbusRxQueueHandle;
+osMutexId EEPROM_MutexHandle;
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN FunctionPrototypes */
+
+/* USER CODE END FunctionPrototypes */
+
+void StartTask_LED(void const * argument);
+void StartTask_RS485(void const * argument);
+void StartTask03(void const * argument);
+void StartTask_XKC(void const * argument);
+
+void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* GetIdleTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
+
+/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
+static StaticTask_t xIdleTaskTCBBuffer;
+static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
+
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
+  *ppxIdleTaskStackBuffer = &xIdleStack[0];
+  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+  /* place for user code */
+}
+/* USER CODE END GET_IDLE_TASK_MEMORY */
+
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
+void MX_FREERTOS_Init(void) {
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+  /* Create the mutex(es) */
+  /* definition and creation of EEPROM_Mutex */
+  osMutexDef(EEPROM_Mutex);
+  EEPROM_MutexHandle = osMutexCreate(osMutex(EEPROM_Mutex));
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of ModbusRxQueue */
+  osMessageQDef(ModbusRxQueue, 2, uint16_t);
+  ModbusRxQueueHandle = osMessageCreate(osMessageQ(ModbusRxQueue), NULL);
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of Task_LED */
+  osThreadDef(Task_LED, StartTask_LED, osPriorityNormal, 0, 128);
+  Task_LEDHandle = osThreadCreate(osThread(Task_LED), NULL);
+
+  /* definition and creation of Task_RS485 */
+  osThreadDef(Task_RS485, StartTask_RS485, osPriorityHigh, 0, 128);
+  Task_RS485Handle = osThreadCreate(osThread(Task_RS485), NULL);
+
+  /* definition and creation of TaskPanel */
+  osThreadDef(TaskPanel, StartTask03, osPriorityBelowNormal, 0, 256);
+  TaskPanelHandle = osThreadCreate(osThread(TaskPanel), NULL);
+
+  /* definition and creation of Task_XKC */
+  osThreadDef(Task_XKC, StartTask_XKC, osPriorityNormal, 0, 128);
+  Task_XKCHandle = osThreadCreate(osThread(Task_XKC), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+}
+
+/* USER CODE BEGIN Header_StartTask_LED */
+/**
+  * @brief  Function implementing the Task_LED thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartTask_LED */
+void StartTask_LED(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_LED */
+  /* Infinite loop */
+Task_LED_Process(argument); // 直接调用外部文件封装好的代码
+  for(;;) { osDelay(1); }     // 兜底保护
+  /* USER CODE END StartTask_LED */
+}
+
+/* USER CODE BEGIN Header_StartTask_RS485 */
+/**
+* @brief Function implementing the Task_RS485 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_RS485 */
+void StartTask_RS485(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_RS485 */
+  /* Infinite loop */
+Task_RS485Log_Process(argument); // 挂载核心业务
+  for(;;) { osDelay(1); }          // 兜底保护
+  /* USER CODE END StartTask_RS485 */
+}
+
+/* USER CODE BEGIN Header_StartTask03 */
+/**
+* @brief Function implementing the TaskPanel thread.
+* @param argument: Not used
+* @retval None
+*/
+extern void Task_Panel_Process(void const *argument); // 引入声明
+/* USER CODE END Header_StartTask03 */
+void StartTask03(void const * argument)
+{
+  /* USER CODE BEGIN StartTask03 */
+  /* Infinite loop */
+Task_Panel_Process(argument); // 挂载最新写的屏幕控制系统！
+  for(;;) { osDelay(1); }
+  /* USER CODE END StartTask03 */
+}
+
+/* USER CODE BEGIN Header_StartTask_XKC */
+/**
+* @brief Function implementing the Task_XKC thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_XKC */
+void StartTask_XKC(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_XKC */
+  /* Infinite loop */
+Task_XKC_Y20_V_Process(argument); // <--- 【修改这里】：调用专属函数！
+  
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1); 
+  }
+  /* USER CODE END StartTask_XKC */
+}
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+
+/* USER CODE END Application */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
