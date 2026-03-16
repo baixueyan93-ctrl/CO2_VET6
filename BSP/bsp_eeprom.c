@@ -4,15 +4,29 @@
 
 extern I2C_HandleTypeDef hi2c1;
 
-// 基础写入 (带 5ms 物理避坑延时)
+// 彻底解决跨页覆盖问题，并完美兼容 24C16 的动态器件地址
+// ==========================================
 void BSP_EEPROM_Write(uint16_t memAddress, uint8_t *pData, uint16_t size) {
-    HAL_I2C_Mem_Write(&hi2c1, EEPROM_ADDRESS, memAddress, I2C_MEMADD_SIZE_8BIT, pData, size, 100);
-    vTaskDelay(pdMS_TO_TICKS(5)); 
+    for(uint16_t i = 0; i < size; i++) {
+        uint16_t current_addr = memAddress + i;
+        // 24C16 的前 3 位地址要藏在器件地址里
+        uint8_t dev_addr = EEPROM_ADDRESS | ((current_addr >> 8) << 1); 
+        uint8_t reg_addr = current_addr & 0xFF; // 低 8 位作为内部地址
+        
+        HAL_I2C_Mem_Write(&hi2c1, dev_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, &pData[i], 1, 100);
+        vTaskDelay(pdMS_TO_TICKS(5)); // 写完1个字节必须等5ms，让EEPROM完成物理烧写
+    }
 }
 
-// 基础读取
+// 终极读取法 (原理同上)
 void BSP_EEPROM_Read(uint16_t memAddress, uint8_t *pData, uint16_t size) {
-    HAL_I2C_Mem_Read(&hi2c1, EEPROM_ADDRESS, memAddress, I2C_MEMADD_SIZE_8BIT, pData, size, 100);
+    for(uint16_t i = 0; i < size; i++) {
+        uint16_t current_addr = memAddress + i;
+        uint8_t dev_addr = EEPROM_ADDRESS | ((current_addr >> 8) << 1); 
+        uint8_t reg_addr = current_addr & 0xFF;
+        
+        HAL_I2C_Mem_Read(&hi2c1, dev_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, &pData[i], 1, 100);
+    }
 }
 
 // ==========================================

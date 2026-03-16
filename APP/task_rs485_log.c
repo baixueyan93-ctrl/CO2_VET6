@@ -12,13 +12,13 @@
 
 extern UART_HandleTypeDef huart4;
 extern osMutexId EEPROM_MutexHandle;
-
+extern float g_set_limit;
 // ==========================================
 // 极简接收缓冲区
 // ==========================================
-uint8_t rx_byte;           // 每次只收1个字节
-uint8_t rx_buffer[128];    // 存字符串的数组
-uint16_t rx_index = 0;     // 当前存到了第几个
+volatile uint8_t rx_byte;           // 每次只收1个字节
+volatile uint8_t rx_buffer[128];    // 存字符串的数组
+volatile uint16_t rx_index = 0;     // 当前存到了第几个
 volatile uint8_t rx_complete = 0; // 接收完成标志 (1表示收完了)
 
 // HAL 库自带的接收中断回调 (每收到1个字节，自动进这里一次)
@@ -32,7 +32,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
             rx_complete = 1;            // 通知任务去处理
         } else {
             // 如果还没收完，就继续监听下一个字节
-            HAL_UART_Receive_IT(&huart4, &rx_byte, 1);
+            HAL_UART_Receive_IT(&huart4, (uint8_t *)&rx_byte, 1);
         }
     }
 }
@@ -65,6 +65,14 @@ uint8_t System_Record_Fault(uint8_t fault_code) {
     // 【前提提示】：下面这行需要您在 bsp_eeprom.h 的 SysLog_t 结构体里提前加上 float CondTemp;
     new_log.CondTemp = current_sensor_data.V_EXH_T;   // 填入 50K 排气/冷凝温度
     
+		new_log.SetTemp  = g_set_limit; 
+
+    // 【问题7修复】：计算 EEPROM 校验和 (累加前 19 个字节的数据)
+    new_log.CheckSum = 0;
+    uint8_t *pLog = (uint8_t *)&new_log;
+    for(int i = 0; i < sizeof(SysLog_t) - 1; i++) {
+        new_log.CheckSum += pLog[i];
+    }
     // 【未来扩展】：如果您以后加了压力，也是在这里直接加一句：
     // new_log.Pressure = current_sensor_data.V_PRES; 
 
@@ -89,7 +97,7 @@ void Task_RS485Log_Process(void const *argument) {
     BSP_RS485_SendString("\r\n--- Simple Mode Ready! ---\r\n");
     
     // 开启第一次中断接收 (只等 1 个字节)
-    HAL_UART_Receive_IT(&huart4, &rx_byte, 1);
+    HAL_UART_Receive_IT(&huart4, (uint8_t *)&rx_byte, 1);
     
     for(;;) {
         // 如果上面中断里说：指令收完了！
@@ -194,7 +202,7 @@ void Task_RS485Log_Process(void const *argument) {
 						
             // 处理完后，清理战场，重新开启监听
             rx_index = 0;
-            memset(rx_buffer, 0, sizeof(rx_buffer));
+            memset((uint8_t *)rx_buffer, 0, sizeof(rx_buffer));
             rx_complete = 0;
 						// ==========================================
             // 【终极杀手锏】：暴力清除所有硬件级死锁标志！
@@ -206,7 +214,7 @@ void Task_RS485Log_Process(void const *argument) {
             
             huart4.ErrorCode = HAL_UART_ERROR_NONE; // 强行骗过 HAL 库，说没错误
             huart4.RxState = HAL_UART_STATE_READY;  // 强行把状态机掰回准备就绪状态
-            HAL_UART_Receive_IT(&huart4, &rx_byte, 1); 
+            HAL_UART_Receive_IT(&huart4, (uint8_t *)&rx_byte, 1); 
         }
         
         // 没事干就睡 50ms，不占 CPU

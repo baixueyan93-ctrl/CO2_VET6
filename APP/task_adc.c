@@ -59,7 +59,10 @@ int16_t adc_to_temperature_50k(uint16_t adc_value) {
     float inv_t = (1.0f / T_NOMINAL) + (log(r_ntc / R_NTC_NOMINAL) / B_VALUE);
     float temp_celsius = (1.0f / inv_t) - 273.15f;
 
-    int32_t temp_scaled = (int32_t)(temp_celsius * 10.0f + 0.5f);  
+    // 精确处理负数的四舍五入！
+    int32_t temp_scaled = (temp_celsius >= 0) ? 
+                          (int32_t)(temp_celsius * 10.0f + 0.5f) : 
+                          (int32_t)(temp_celsius * 10.0f - 0.5f);
     if (temp_scaled < -1000) return -1000;
     else if (temp_scaled > 2000) return 2000;
     else return (int16_t)temp_scaled;

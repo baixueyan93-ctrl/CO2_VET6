@@ -123,7 +123,7 @@ void MX_FREERTOS_Init(void) {
   Task_LEDHandle = osThreadCreate(osThread(Task_LED), NULL);
 
   /* definition and creation of Task_RS485 */
-  osThreadDef(Task_RS485, StartTask_RS485, osPriorityHigh, 0, 128);
+  osThreadDef(Task_RS485, StartTask_RS485, osPriorityHigh, 0, 512);
   Task_RS485Handle = osThreadCreate(osThread(Task_RS485), NULL);
 
   /* definition and creation of TaskPanel */
@@ -131,7 +131,7 @@ void MX_FREERTOS_Init(void) {
   TaskPanelHandle = osThreadCreate(osThread(TaskPanel), NULL);
 
   /* definition and creation of Task_ADC */
-  osThreadDef(Task_ADC, StartTask_ADC, osPriorityIdle, 0, 512);
+  osThreadDef(Task_ADC, StartTask_ADC, osPriorityNormal, 0, 512);
   Task_ADCHandle = osThreadCreate(osThread(Task_ADC), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

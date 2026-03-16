@@ -1,10 +1,11 @@
+#include "task_panel.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "bsp_htc_2k.h"
-// 如果您想在这个任务里控制外设，可以 #include "bsp_led.h"
+#include "sys_state.h"   // 【新增】引入系统黑板
+#include "sys_config.h"  // 【新增】引入参数配置 (包含迟滞参数 C_TEMP_HYST_C1)
 
-// 将您原来的全局变量移到这里 (后续可以放入 sys_state 统一管理)
-float g_env_temp  = -5.0f;   // 模拟环境温度
+float g_env_temp  = -5.0f;   // 运行时的真实环境温度
 float g_set_limit = -5.0f;   // 默认设定阈值
 uint8_t g_mode    = 0;       // 0: 监控模式, 1: 设置模式
 
@@ -16,6 +17,11 @@ void Task_Panel_Process(void const *argument) {
     
     // 2. 进入 RTOS 独立线程死循环
     for(;;) {
+        // ================= 【问题3修复】去黑板上抄真实温度 =================
+        SysSensorData_t sensor_data;
+        SysState_GetSensor(&sensor_data);
+        g_env_temp = sensor_data.V_EVAP_T; // 拿到 10K 的真实蒸发器温度！
+        
         // ================= 任务1：按键处理 =================
         key_val = BSP_HTC2K_ReadKeys();
         
@@ -54,11 +60,12 @@ void Task_Panel_Process(void const *argument) {
         // ================= 任务2：显示与控制图标 =================
         if (g_mode == 0) {
             // [监控模式] 图标控制逻辑
-            if (g_env_temp > g_set_limit) {
+            // 【问题13修复】：加入迟滞算法！防止继电器频繁“吧嗒”响
+            if (g_env_temp > (g_set_limit + C_TEMP_HYST_C1)) {
                 g_IconSet.bits.Ref = 1;  
                 g_IconSet.bits.Fan = 1;  
                 g_IconSet.bits.Heat = 0; 
-            } else {
+            } else if (g_env_temp < (g_set_limit - C_TEMP_HYST_C1)) {
                 g_IconSet.bits.Ref = 0;
                 g_IconSet.bits.Fan = 0;
                 g_IconSet.bits.Heat = 1; 
@@ -69,12 +76,9 @@ void Task_Panel_Process(void const *argument) {
             BSP_HTC2K_ShowTemp(g_set_limit); 
         }
 
-        // ================= 【极度关键】：让出 CPU！ =================
-        // 原来的 delay_ms(50) 变成了绝对安全的 RTOS 延时
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
-
 
 
 

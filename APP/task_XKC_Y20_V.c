@@ -36,8 +36,8 @@ void Task_XKC_Y20_V_Process(void const *argument) {
             liquidLevel = 0; 
         }
 
-        sprintf(msg, "liquidLevel= %d\r\n", liquidLevel);
-        BSP_RS485_SendString(msg);
+        //sprintf(msg, "liquidLevel= %d\r\n", liquidLevel);
+        //BSP_RS485_SendString(msg);
 
         // 3. 顺手更新到系统数据黑板（为了兼容您的 GET 指令）
         SysSensorData_t sensor_data = {0};

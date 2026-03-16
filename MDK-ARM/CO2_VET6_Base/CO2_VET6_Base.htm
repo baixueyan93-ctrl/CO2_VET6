@@ -3,9 +3,9 @@
 <title>Static Call Graph - [CO2_VET6_Base\CO2_VET6_Base.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image CO2_VET6_Base\CO2_VET6_Base.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Mar 16 19:05:58 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Mar 16 20:28:41 2026
 <BR><P>
-<H3>Maximum Stack Usage =        432 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        464 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 StartTask_RS485 &rArr; Task_RS485Log_Process &rArr; System_Record_Fault &rArr; BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 <P>
@@ -969,8 +969,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_btod_emul
 </UL>
 
-<P><STRONG><a name="[b9]"></a>BSP_EEPROM_Read</STRONG> (Thumb, 22 bytes, Stack size 16 bytes, bsp_eeprom.o(i.BSP_EEPROM_Read))
-<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[b9]"></a>BSP_EEPROM_Read</STRONG> (Thumb, 68 bytes, Stack size 48 bytes, bsp_eeprom.o(i.BSP_EEPROM_Read))
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Mem_Read
 </UL>
@@ -978,8 +978,8 @@ Global Symbols
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Log_Init
 </UL>
 
-<P><STRONG><a name="[bb]"></a>BSP_EEPROM_Write</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, bsp_eeprom.o(i.BSP_EEPROM_Write))
-<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[bb]"></a>BSP_EEPROM_Write</STRONG> (Thumb, 74 bytes, Stack size 48 bytes, bsp_eeprom.o(i.BSP_EEPROM_Write))
+<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Mem_Write
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
@@ -1036,7 +1036,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[cd]"></a>BSP_Log_Add</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, bsp_eeprom.o(i.BSP_Log_Add))
-<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_EEPROM_Write
 </UL>
@@ -1048,7 +1048,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[ce]"></a>BSP_Log_Init</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, bsp_eeprom.o(i.BSP_Log_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = BSP_Log_Init &rArr; BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = BSP_Log_Init &rArr; BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_EEPROM_Write
 <LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_EEPROM_Read
@@ -1057,7 +1057,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[cf]"></a>BSP_Log_Read_By_Index</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, bsp_eeprom.o(i.BSP_Log_Read_By_Index))
-<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = BSP_Log_Read_By_Index &rArr; BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = BSP_Log_Read_By_Index &rArr; BSP_EEPROM_Read &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_EEPROM_Read
 </UL>
@@ -1592,8 +1592,10 @@ Global Symbols
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 
-<P><STRONG><a name="[11a]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, task_rs485_log.o(i.HAL_UART_RxCpltCallback))
-<BR><BR>[Calls]<UL><LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
+<P><STRONG><a name="[11a]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 72 bytes, Stack size 8 bytes, task_rs485_log.o(i.HAL_UART_RxCpltCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = HAL_UART_RxCpltCallback
+</UL>
+<BR>[Calls]<UL><LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_Receive_IT
 </UL>
@@ -1724,7 +1726,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[70]"></a>StartTask03</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, freertos.o(i.StartTask03))
-<BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = StartTask03 &rArr; Task_Panel_Process &rArr; BSP_HTC2K_Init &rArr; HAL_GPIO_Init
+<BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = StartTask03 &rArr; Task_Panel_Process &rArr; SysState_GetSensor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_Panel_Process
@@ -1748,7 +1750,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
 <P><STRONG><a name="[6f]"></a>StartTask_RS485</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, freertos.o(i.StartTask_RS485))
-<BR><BR>[Stack]<UL><LI>Max Depth = 432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 464 + Unknown Stack Size
 <LI>Call Chain = StartTask_RS485 &rArr; Task_RS485Log_Process &rArr; System_Record_Fault &rArr; BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -1764,6 +1766,7 @@ Global Symbols
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_RS485Log_Process
+<LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_Panel_Process
 <LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_ADC_Process
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;System_Record_Fault
 </UL>
@@ -1807,16 +1810,16 @@ Global Symbols
 <P><STRONG><a name="[5f]"></a>SystemInit</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, system_stm32f4xx.o(i.SystemInit))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(.text)
 </UL>
-<P><STRONG><a name="[138]"></a>System_Record_Fault</STRONG> (Thumb, 140 bytes, Stack size 80 bytes, task_rs485_log.o(i.System_Record_Fault))
-<BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = System_Record_Fault &rArr; BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[138]"></a>System_Record_Fault</STRONG> (Thumb, 174 bytes, Stack size 80 bytes, task_rs485_log.o(i.System_Record_Fault))
+<BR><BR>[Stack]<UL><LI>Max Depth = 264<LI>Call Chain = System_Record_Fault &rArr; BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_GetTime
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_GetDate
 <LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMutexWait
 <LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMutexRelease
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_GetSensor
 <LI><a href="#[cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Log_Add
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_GetSensor
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_RS485Log_Process
 </UL>
@@ -1857,10 +1860,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartTask_LED
 </UL>
 
-<P><STRONG><a name="[12a]"></a>Task_Panel_Process</STRONG> (Thumb, 228 bytes, Stack size 8 bytes, task_panel.o(i.Task_Panel_Process))
-<BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = Task_Panel_Process &rArr; BSP_HTC2K_Init &rArr; HAL_GPIO_Init
+<P><STRONG><a name="[12a]"></a>Task_Panel_Process</STRONG> (Thumb, 266 bytes, Stack size 32 bytes, task_panel.o(i.Task_Panel_Process))
+<BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = Task_Panel_Process &rArr; SysState_GetSensor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_GetSensor
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_HTC2K_ShowTemp
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_HTC2K_ReadKeys
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_HTC2K_Init
@@ -1869,7 +1873,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[12e]"></a>Task_RS485Log_Process</STRONG> (Thumb, 520 bytes, Stack size 200 bytes, task_rs485_log.o(i.Task_RS485Log_Process))
-<BR><BR>[Stack]<UL><LI>Max Depth = 432 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 464 + Unknown Stack Size
 <LI>Call Chain = Task_RS485Log_Process &rArr; System_Record_Fault &rArr; BSP_Log_Add &rArr; BSP_EEPROM_Write &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_SetTime
@@ -1885,13 +1889,13 @@ Global Symbols
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0sscanf
 <LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_Init
-<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_GetSensor
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_RS485_SendString
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_RS485_Init
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Log_Read_By_Index
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Log_Init
 <LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Log_Get_Current_Index
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;System_Record_Fault
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysState_GetSensor
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartTask_RS485
 </UL>
@@ -1990,7 +1994,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_ADC_Process
 </UL>
 
-<P><STRONG><a name="[13c]"></a>adc_to_temperature_50k</STRONG> (Thumb, 180 bytes, Stack size 8 bytes, task_adc.o(i.adc_to_temperature_50k))
+<P><STRONG><a name="[13c]"></a>adc_to_temperature_50k</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, task_adc.o(i.adc_to_temperature_50k))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = adc_to_temperature_50k &rArr; __hardfp_log &rArr; __kernel_poly &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_log
@@ -2806,7 +2810,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[10f]"></a>UART_Receive_IT</STRONG> (Thumb, 192 bytes, Stack size 8 bytes, stm32f4xx_hal_uart.o(i.UART_Receive_IT))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = UART_Receive_IT
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = UART_Receive_IT &rArr; HAL_UART_RxCpltCallback
 </UL>
 <BR>[Calls]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
