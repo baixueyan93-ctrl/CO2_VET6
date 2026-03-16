@@ -6,6 +6,7 @@
 #include "bsp_rs485.h"
 #include "sys_state.h"
 #include "rtc.h"
+#include "task_adc.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -44,6 +45,7 @@ uint8_t System_Record_Fault(uint8_t fault_code) {
     RTC_DateTypeDef sDate;
     RTC_TimeTypeDef sTime;
 
+    // 1. 获取当前的 RTC 时间戳
     HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 
@@ -51,10 +53,22 @@ uint8_t System_Record_Fault(uint8_t fault_code) {
     new_log.Hours = sTime.Hours; new_log.Minutes = sTime.Minutes; new_log.Seconds = sTime.Seconds;
     new_log.EventType = fault_code;
 
-    SysSensorData_t current_temp = {0};
-    SysState_GetSensor(&current_temp);
-    new_log.EvapTemp = current_temp.V_EVAP_T; 
+    // ==========================================
+    // 2. 【核心修改】：去系统的安全黑板上抄最新数据！
+    // ==========================================
+    SysSensorData_t current_sensor_data;
+    SysState_GetSensor(&current_sensor_data); 
 
+    // 3. 把黑板上的真实数据，填入 EEPROM 的记录表格里
+    new_log.EvapTemp = current_sensor_data.V_EVAP_T;  // 填入 10K 蒸发温度
+    
+    // 【前提提示】：下面这行需要您在 bsp_eeprom.h 的 SysLog_t 结构体里提前加上 float CondTemp;
+    new_log.CondTemp = current_sensor_data.V_EXH_T;   // 填入 50K 排气/冷凝温度
+    
+    // 【未来扩展】：如果您以后加了压力，也是在这里直接加一句：
+    // new_log.Pressure = current_sensor_data.V_PRES; 
+
+    // 4. 安全存入物理黑匣子
     if(osMutexWait(EEPROM_MutexHandle, 500) == osOK) {
         BSP_Log_Add(&new_log); 
         osMutexRelease(EEPROM_MutexHandle); 
@@ -83,12 +97,18 @@ void Task_RS485Log_Process(void const *argument) {
             
             // 1. 处理 GET 指令
             if(strstr((char *)rx_buffer, "GET") != NULL) {
-                SysSensorData_t current_data = {0};
-                SysState_GetSensor(&current_data); 
-                char reply_msg[64];
-                sprintf(reply_msg, "Temp:%.1f | Liq:%d\r\n", current_data.V_EVAP_T, current_data.Liquid_Level);
-                BSP_RS485_SendString(reply_msg);
-            }
+    SysSensorData_t current_data;
+    
+    // 【修改这里】：去系统的安全黑板上读取最新数据！
+    SysState_GetSensor(&current_data); 
+    
+    char reply_msg[64];
+    // 打印从结构体里读出来的蒸发温度(10K)和排气温度(50K)
+    sprintf(reply_msg, "T_Evap(10K):%.1f | T_Exh(50K):%.1f\r\n", 
+            current_data.V_EVAP_T, current_data.V_EXH_T);
+            
+    BSP_RS485_SendString(reply_msg);
+}
             // 2. 处理 TEST 指令
             else if(strstr((char *)rx_buffer, "TEST") != NULL) {
                 if(System_Record_Fault(0x99) == 0) BSP_RS485_SendString("Test Saved!\r\n");

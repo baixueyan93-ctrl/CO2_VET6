@@ -24,6 +24,9 @@ co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_ex
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 co2_vet6_base\bsp_eeprom.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h

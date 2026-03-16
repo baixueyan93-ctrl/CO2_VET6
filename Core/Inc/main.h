@@ -64,8 +64,6 @@ void Error_Handler(void);
 #define LED1_GPIO_Port GPIOC
 #define RS485_DIR_Pin GPIO_PIN_12
 #define RS485_DIR_GPIO_Port GPIOC
-#define SW53_SENSOR_Pin GPIO_PIN_7
-#define SW53_SENSOR_GPIO_Port GPIOD
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

@@ -39,6 +39,9 @@ co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ha
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 co2_vet6_base\task_rs485_log.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
@@ -56,5 +59,6 @@ co2_vet6_base\task_rs485_log.o: ..\BSP\bsp_rs485.h
 co2_vet6_base\task_rs485_log.o: ..\Config\sys_state.h
 co2_vet6_base\task_rs485_log.o: D:\MDK534\ARM\ARMCC\Bin\..\include\stdbool.h
 co2_vet6_base\task_rs485_log.o: ../Core/Inc/rtc.h
+co2_vet6_base\task_rs485_log.o: ..\APP\task_adc.h
 co2_vet6_base\task_rs485_log.o: D:\MDK534\ARM\ARMCC\Bin\..\include\stdio.h
 co2_vet6_base\task_rs485_log.o: D:\MDK534\ARM\ARMCC\Bin\..\include\string.h

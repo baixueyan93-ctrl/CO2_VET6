@@ -30,7 +30,8 @@
 //#include "task_buzzer.h" // 引入 蜂鸣器 业务
 #include "task_panel.h"  // 引入 面板 业务
 #include "task_rs485_log.h"// 引入 通信 业务
-#include "task_XKC_Y20_V.h"// 引入 XKC_Y20_V 传感器业务
+//#include "task_XKC_Y20_V.h"// 引入 XKC_Y20_V 传感器业务
+#include "task_adc.h"// 引入 ADC 业务
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,8 +56,7 @@
 osThreadId Task_LEDHandle;
 osThreadId Task_RS485Handle;
 osThreadId TaskPanelHandle;
-osThreadId Task_XKCHandle;
-osMessageQId ModbusRxQueueHandle;
+osThreadId Task_ADCHandle;
 osMutexId EEPROM_MutexHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,7 +67,7 @@ osMutexId EEPROM_MutexHandle;
 void StartTask_LED(void const * argument);
 void StartTask_RS485(void const * argument);
 void StartTask03(void const * argument);
-void StartTask_XKC(void const * argument);
+void StartTask_ADC(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -113,11 +113,6 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
-  /* Create the queue(s) */
-  /* definition and creation of ModbusRxQueue */
-  osMessageQDef(ModbusRxQueue, 2, uint16_t);
-  ModbusRxQueueHandle = osMessageCreate(osMessageQ(ModbusRxQueue), NULL);
-
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -135,9 +130,9 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(TaskPanel, StartTask03, osPriorityBelowNormal, 0, 256);
   TaskPanelHandle = osThreadCreate(osThread(TaskPanel), NULL);
 
-  /* definition and creation of Task_XKC */
-  osThreadDef(Task_XKC, StartTask_XKC, osPriorityNormal, 0, 128);
-  Task_XKCHandle = osThreadCreate(osThread(Task_XKC), NULL);
+  /* definition and creation of Task_ADC */
+  osThreadDef(Task_ADC, StartTask_ADC, osPriorityIdle, 0, 512);
+  Task_ADCHandle = osThreadCreate(osThread(Task_ADC), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -194,25 +189,24 @@ Task_Panel_Process(argument); // 挂载最新写的屏幕控制系统！
   /* USER CODE END StartTask03 */
 }
 
-/* USER CODE BEGIN Header_StartTask_XKC */
+/* USER CODE BEGIN Header_StartTask_ADC */
 /**
-* @brief Function implementing the Task_XKC thread.
+* @brief Function implementing the Task_ADC thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTask_XKC */
-void StartTask_XKC(void const * argument)
+/* USER CODE END Header_StartTask_ADC */
+void StartTask_ADC(void const * argument)
 {
-  /* USER CODE BEGIN StartTask_XKC */
-  /* Infinite loop */
-Task_XKC_Y20_V_Process(argument); // <--- 【修改这里】：调用专属函数！
-  
+  /* USER CODE BEGIN StartTask_ADC */
+	// 注入灵魂：调用咱们写好的 ADC 测温大循环！
+  Task_ADC_Process(argument);
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1); 
+    osDelay(1);
   }
-  /* USER CODE END StartTask_XKC */
+  /* USER CODE END StartTask_ADC */
 }
 
 /* Private application code --------------------------------------------------*/

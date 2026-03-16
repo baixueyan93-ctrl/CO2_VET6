@@ -11,12 +11,12 @@ void Task_LED_Process(void const *argument) {
         tick_count++;
         
         // 【逻辑1】LED1 (PC13 系统心跳)：每 500ms 翻转一次 (50 * 10ms = 500ms)
-        if(tick_count % 50 == 0) {
+        if(tick_count % 100 == 0) {
             BSP_LED1_Toggle(); 
         }
         
         // 【逻辑2】LED0 (PE6 报警快闪)：每 100ms 翻转一次 (10 * 10ms = 100ms)
-        if(tick_count % 10 == 0) {
+        if(tick_count % 50 == 0) {
             BSP_LED0_Toggle(); 
         }
         

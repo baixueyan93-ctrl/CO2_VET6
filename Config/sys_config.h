@@ -60,9 +60,10 @@ typedef struct {
     uint8_t Minutes;  // 分
     uint8_t Seconds;  // 秒
     
-    // 2. 核心业务数据 (8 字节)
+    // 2. 核心业务数据 (12 字节)
     float   EvapTemp;   // 发生时的蒸发器温度 (4字节)
     float   SetTemp;    // 当时的设定温度 (4字节)
+    float   CondTemp;   // 【新增】：发生时的冷凝/排气温度 (4字节)
     
     // 3. 事件类型与校验 (2 字节)
     uint8_t EventType;  // 事件码 (0=每日记录, 1=高温报警, 2=除霜记录)
@@ -70,8 +71,9 @@ typedef struct {
 } SysLog_t;
 #pragma pack(pop)
 
-#define LOG_MAX_COUNT       127     // 环形存储最大条数 (127条)
-#define LOG_SIZE            16      // 每条固定占用 16 字节
+// ?? 【核心拆弹区】：跟着结构体的膨胀一起修改！
+#define LOG_MAX_COUNT       100     // 【修改】：因为每条变大了，最大只能存 100 条了 (原127)
+#define LOG_SIZE            20      // 【修改】：每条现在固定占用 20 字节 (原16)
 #define EEPROM_INDEX_ADDR   0x0000  // 指针地址：存当前写到了第几条 (0x0000)
 #define EEPROM_DATA_START   0x0010  // 数据区起始地址 (0x0010)
 

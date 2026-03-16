@@ -16,9 +16,9 @@
 /* --- 传感器测量数据结构体 --- */
 typedef struct {
     float V_CAB_T;      // 柜温
-    float V_EXH_T;      // 排气温度
+    float V_EXH_T;      // 排气温度【由 50K 探头采集】
     float V_SUC_T;      // 回气温度
-    float V_EVAP_T;     // 蒸发温度
+    float V_EVAP_T;     // 蒸发温度【由 10K 探头采集】
 	uint8_t Liquid_Level; // 液位状态 (1:有水, 0:没水)
     float   V_PRES;       // 压力真实值 (MPa)
     // ...后续扩展
