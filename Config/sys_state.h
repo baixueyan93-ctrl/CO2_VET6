@@ -48,9 +48,9 @@ typedef struct {
     /* --- 液位传感器 --- */
     uint8_t VAR_LIQUID_LEVEL;   /* 液位状态 (1:有水, 0:没水)              */
 
-    /* --- SHT30 环境温湿度传感器 (I2C1 共用, 地址 0x44) --- */
-    float VAR_SHT30_TEMP;       /* SHT30 环境温度 (°C)                    */
-    float VAR_SHT30_HUMI;       /* SHT30 相对湿度 (% RH)                  */
+    /* --- SHT40 环境温湿度传感器 (I2C1 共用, 地址 0x44) --- */
+    float VAR_SHT40_TEMP;       /* SHT40 环境温度 (°C)                    */
+    float VAR_SHT40_HUMI;       /* SHT40 相对湿度 (% RH)                  */
 } SysVarData_t;
 
 
