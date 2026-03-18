@@ -30,10 +30,11 @@
 //#include "task_buzzer.h" // 引入 蜂鸣器 业务
 #include "task_panel.h"  // 引入 面板 业务
 #include "task_rs485_log.h"// 引入 通信 业务
-//#include "task_XKC_Y20_V.h"// 引入 XKC_Y20_V 传感器业务
-#include "task_adc.h"// 引入 ADC 业务
+//#include "task_XKC_Y20_V.h"  // 引入 XKC_Y20_V 传感器业务
+#include "task_adc.h"    // 引入 ADC 业务
 #include "task_sht30.h"   // SHT30 温湿度采集
 #include "bsp_i2c_mutex.h" // I2C1 总线互斥锁
+#include "sys_state.h"    //引入系统状态头文件
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,12 +54,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-osThreadId Task_SHT30Handle;
+
 /* USER CODE END Variables */
 osThreadId Task_LEDHandle;
 osThreadId Task_RS485Handle;
 osThreadId TaskPanelHandle;
 osThreadId Task_ADCHandle;
+osThreadId Task_SHT30Handle;
 osMutexId EEPROM_MutexHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,6 +72,7 @@ void StartTask_LED(void const * argument);
 void StartTask_RS485(void const * argument);
 void StartTask03(void const * argument);
 void StartTask_ADC(void const * argument);
+void StartTask_SHT30(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -104,7 +107,8 @@ void MX_FREERTOS_Init(void) {
   EEPROM_MutexHandle = osMutexCreate(osMutex(EEPROM_Mutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+  BSP_I2C1_MutexInit();  // 必须最先初始化硬件总线锁
+  SysState_Init();       // 必须在调度器启动前初始化全局数据字典和系统锁
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -125,7 +129,7 @@ void MX_FREERTOS_Init(void) {
   Task_LEDHandle = osThreadCreate(osThread(Task_LED), NULL);
 
   /* definition and creation of Task_RS485 */
-  osThreadDef(Task_RS485, StartTask_RS485, osPriorityHigh, 0, 512);
+  osThreadDef(Task_RS485, StartTask_RS485, osPriorityHigh, 0, 1024);
   Task_RS485Handle = osThreadCreate(osThread(Task_RS485), NULL);
 
   /* definition and creation of TaskPanel */
@@ -136,10 +140,13 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(Task_ADC, StartTask_ADC, osPriorityNormal, 0, 512);
   Task_ADCHandle = osThreadCreate(osThread(Task_ADC), NULL);
 
+  /* definition and creation of Task_SHT30 */
+  osThreadDef(Task_SHT30, StartTask_SHT30, osPriorityBelowNormal, 0, 256);
+  Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
    /* SHT30 温湿度采集任务 (1秒周期, 低优先级, 256字栈) */
-  osThreadDef(Task_SHT30, Task_SHT30_Process, osPriorityBelowNormal, 0, 256);
-  Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
+
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -211,6 +218,25 @@ void StartTask_ADC(void const * argument)
     osDelay(1);
   }
   /* USER CODE END StartTask_ADC */
+}
+
+/* USER CODE BEGIN Header_StartTask_SHT30 */
+/**
+* @brief Function implementing the Task_SHT30 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_SHT30 */
+void StartTask_SHT30(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_SHT30 */
+  /* Infinite loop */
+    Task_SHT30_Process(argument);  // 调用你写好的业务函数
+	for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartTask_SHT30 */
 }
 
 /* Private application code --------------------------------------------------*/

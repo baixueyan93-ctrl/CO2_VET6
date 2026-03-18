@@ -75,7 +75,7 @@ uint8_t System_Record_Fault(uint8_t fault_code) {
 // 任务主函数
 // ==========================================
 void Task_RS485Log_Process(void const *argument) {
-    SysState_Init();  // 初始化系统
+    
     BSP_RS485_Init();
     BSP_Log_Init(); 
     osDelay(100); 
@@ -96,10 +96,11 @@ void Task_RS485Log_Process(void const *argument) {
     // 从系统的安全黑板上读取传感器数据
     SysState_GetSensor(&current_data); 
     
-    char reply_msg[64];
+    char reply_msg[128];
     // 打印从结构体中取出的两路温度(10K)和排气温度(50K)
-    sprintf(reply_msg, "T_Evap(10K):%.1f | T_Exh(50K):%.1f\r\n", 
-            current_data.VAR_EVAP_TEMP, current_data.VAR_EXHAUST_TEMP);
+    sprintf(reply_msg, "T_Evap(10K):%.1f | T_Exh(50K):%.1f | SHT30: %.1fC %.1f%%RH\r\n", 
+            current_data.VAR_EVAP_TEMP, current_data.VAR_EXHAUST_TEMP,
+            current_data.VAR_SHT30_TEMP, current_data.VAR_SHT30_HUMI);
             
     BSP_RS485_SendString(reply_msg);
 }

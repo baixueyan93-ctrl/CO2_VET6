@@ -9,7 +9,7 @@
 extern ADC_HandleTypeDef hadc1; // 引用 CubeMX 生成的 ADC1 句柄
 
 // 定义全局数组，DMA 会自动往 PC4 和 PC5 的 ADC 原始值实时搬到这里
-uint16_t adc_buffer[2] = {0};   
+volatile uint16_t adc_buffer[2] = {0};   
 float g_temp_10k = 0.0f;
 float g_temp_50k = 0.0f;
 /* ==========================================================
@@ -78,8 +78,10 @@ void Task_ADC_Process(void const *argument) {
         int16_t t_50k_raw = adc_to_temperature_50k(adc_buffer[1]); 
         
         // 2. 直接把实际温度存到全局公告板上
-        g_temp_10k = t_10k_raw / 10.0f;
-        g_temp_50k = t_50k_raw / 10.0f;
+        SysState_Lock();
+        SysState_GetRawPtr()->VAR_CABINET_TEMP = t_10k_raw / 10.0f;
+        SysState_GetRawPtr()->VAR_EXHAUST_TEMP = t_50k_raw / 10.0f;
+        SysState_Unlock();
         
         SysVarData_t temp_sensor_data;
         // 1. 先把黑板上原有的数据都读出来，防止覆盖掉电压、液位等其他已写入的数据

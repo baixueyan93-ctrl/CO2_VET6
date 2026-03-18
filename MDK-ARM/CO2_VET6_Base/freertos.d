@@ -60,3 +60,4 @@ co2_vet6_base\freertos.o: ..\APP\task_sht30.h
 co2_vet6_base\freertos.o: ..\BSP\bsp_sht30.h
 co2_vet6_base\freertos.o: D:\MDK534\ARM\ARMCC\Bin\..\include\stdbool.h
 co2_vet6_base\freertos.o: ..\BSP\bsp_i2c_mutex.h
+co2_vet6_base\freertos.o: ..\Config\sys_state.h

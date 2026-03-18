@@ -176,7 +176,10 @@ extern SysTimerData_t     g_TimerData;         /* 定时计数器                */
 void SysState_Init(void);
 void SysState_UpdateSensor(SysVarData_t* newData);
 void SysState_GetSensor(SysVarData_t* outData);
-
+/* 新增：原子级安全操作接口 */
+void SysState_Lock(void);
+void SysState_Unlock(void);
+SysVarData_t* SysState_GetRawPtr(void);
 #endif /* SYS_STATE_H */
 
 

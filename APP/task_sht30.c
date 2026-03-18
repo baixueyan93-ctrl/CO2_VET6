@@ -18,13 +18,11 @@ void Task_SHT30_Process(void const *argument) {
 
     for (;;) {
         if (BSP_SHT30_Read(&sht30_data)) {
-            SysVarData_t sensor_snapshot;
-            SysState_GetSensor(&sensor_snapshot);
-
-            sensor_snapshot.VAR_SHT30_TEMP = sht30_data.temperature;
-            sensor_snapshot.VAR_SHT30_HUMI = sht30_data.humidity;
-
-            SysState_UpdateSensor(&sensor_snapshot);
+            // 【新代码：使用原子锁直接修改具体字段，绝对安全】
+            SysState_Lock();
+            SysState_GetRawPtr()->VAR_SHT30_TEMP = sht30_data.temperature;
+            SysState_GetRawPtr()->VAR_SHT30_HUMI = sht30_data.humidity;
+            SysState_Unlock();
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));

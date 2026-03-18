@@ -46,6 +46,24 @@ void SysState_GetSensor(SysVarData_t* outData) {
         }
     }
 }
+/* =========================================
+ * 原子级安全操作接口实现
+ * ========================================= */
+void SysState_Lock(void) {
+    if (SensorDataMutex != NULL) {
+        xSemaphoreTake(SensorDataMutex, portMAX_DELAY);
+    }
+}
+
+void SysState_Unlock(void) {
+    if (SensorDataMutex != NULL) {
+        xSemaphoreGive(SensorDataMutex);
+    }
+}
+
+SysVarData_t* SysState_GetRawPtr(void) {
+    return &g_SensorData;
+}
 
 
 
