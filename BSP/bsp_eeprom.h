@@ -3,16 +3,16 @@
 #include "main.h"
 #include "sys_config.h"
 
-/* 24C16 å‚æ•° */
-#define EEPROM_BASE_ADDRESS  0xA0       /* I2C åŸºåœ°å€                     */
-#define EEPROM_PAGE_WRITE    16         /* 24C16 é¡µå†™æœ€å¤§ 16 å­—èŠ‚          */
-#define EEPROM_TOTAL_SIZE    2048       /* 24C16 æ€»å®¹é‡ 2KB               */
+/* 24C16 ²ÎÊı */
+#define EEPROM_BASE_ADDRESS  0xA0       /* I2C »ùµØÖ·                     */
+#define EEPROM_PAGE_WRITE    16         /* 24C16 Ò³Ğ´×î´ó 16 ×Ö½Ú          */
+#define EEPROM_TOTAL_SIZE    2048       /* 24C16 ×ÜÈİÁ¿ 2KB               */
 
-/* åº•å±‚è¯»å†™æ¥å£ (è‡ªåŠ¨å¤„ç† 24C16 åˆ†é¡µå¯»å€ + é¡µå†™è¾¹ç•Œ) */
+/* µ×²ã¶ÁĞ´½Ó¿Ú (×Ô¶¯´¦Àí 24C16 ·ÖÒ³Ñ°Ö· + Ò³Ğ´±ß½ç) */
 void BSP_EEPROM_Write(uint16_t memAddress, uint8_t *pData, uint16_t size);
 void BSP_EEPROM_Read(uint16_t memAddress, uint8_t *pData, uint16_t size);
 
-/* æ—¥å¿—å­˜å‚¨æ¥å£ */
+/* ÈÕÖ¾´æ´¢½Ó¿Ú */
 void    BSP_Log_Init(void);
 void    BSP_Log_Add(SysLog_t *new_log);
 void    BSP_Log_Read_By_Index(uint8_t index, SysLog_t *out_log);

@@ -4,7 +4,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
-/* I2C1 æ€»çº¿äº’æ–¥é” (SHT30 + EEPROM å…±ç”¨) */
+/* I2C1 ×ÜÏß»¥³âËø (SHT30 + EEPROM ¹²ÓÃ) */
 void BSP_I2C1_MutexInit(void);
 void BSP_I2C1_Lock(void);
 void BSP_I2C1_Unlock(void);
