@@ -32,6 +32,8 @@
 #include "task_rs485_log.h"// 引入 通信 业务
 //#include "task_XKC_Y20_V.h"// 引入 XKC_Y20_V 传感器业务
 #include "task_adc.h"// 引入 ADC 业务
+#include "task_sht30.h"   // SHT30 温湿度采集
+#include "bsp_i2c_mutex.h" // I2C1 总线互斥锁
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +53,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+osThreadId Task_SHT30Handle;
 /* USER CODE END Variables */
 osThreadId Task_LEDHandle;
 osThreadId Task_RS485Handle;
@@ -135,7 +137,9 @@ void MX_FREERTOS_Init(void) {
   Task_ADCHandle = osThreadCreate(osThread(Task_ADC), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+   /* SHT30 温湿度采集任务 (1秒周期, 低优先级, 256字栈) */
+  osThreadDef(Task_SHT30, Task_SHT30_Process, osPriorityBelowNormal, 0, 256);
+  Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
   /* USER CODE END RTOS_THREADS */
 
 }

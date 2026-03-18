@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;                     ../Drivers/STM32F4xx_HAL_Driver/Inc;                     ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                     ../Middlewares/Third_Party/FreeRTOS/Source/include;                     ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;                     ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;                     ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                     ../Drivers/CMSIS/Include;                     ..\APP;                     ..\BSP;                     ..\Config;                     ..\BSP\HTC2K</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\APP;..\BSP;..\Config;..\BSP\HTC2K</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1321,6 +1321,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\task_adc.c</FilePath>
             </File>
+            <File>
+              <FileName>task_sht30.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\task_sht30.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1345,6 +1350,16 @@
               <FileName>bsp_rs485.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\bsp_rs485.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_sht30.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_sht30.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_i2c_mutex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_i2c_mutex.c</FilePath>
             </File>
           </Files>
         </Group>

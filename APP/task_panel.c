@@ -18,9 +18,9 @@ void Task_Panel_Process(void const *argument) {
     // 2. 进入 RTOS 独立线程死循环
     for(;;) {
         // ================= 【问题3修复】去黑板上抄真实温度 =================
-        SysSensorData_t sensor_data;
+        SysVarData_t sensor_data;
         SysState_GetSensor(&sensor_data);
-        g_env_temp = sensor_data.V_EVAP_T; // 拿到 10K 的真实蒸发器温度！
+        g_env_temp = sensor_data.VAR_CABINET_TEMP; // 拿到 10K 的真实蒸发器温度！
         
         // ================= 任务1：按键处理 =================
         key_val = BSP_HTC2K_ReadKeys();
@@ -61,11 +61,11 @@ void Task_Panel_Process(void const *argument) {
         if (g_mode == 0) {
             // [监控模式] 图标控制逻辑
             // 【问题13修复】：加入迟滞算法！防止继电器频繁“吧嗒”响
-            if (g_env_temp > (g_set_limit + C_TEMP_HYST_C1)) {
+            if (g_env_temp > (g_set_limit + SET_TEMP_HYST_C1)) {
                 g_IconSet.bits.Ref = 1;  
                 g_IconSet.bits.Fan = 1;  
                 g_IconSet.bits.Heat = 0; 
-            } else if (g_env_temp < (g_set_limit - C_TEMP_HYST_C1)) {
+            } else if (g_env_temp < (g_set_limit - SET_TEMP_HYST_C1)) {
                 g_IconSet.bits.Ref = 0;
                 g_IconSet.bits.Fan = 0;
                 g_IconSet.bits.Heat = 1; 
