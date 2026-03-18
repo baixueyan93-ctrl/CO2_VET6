@@ -73,28 +73,21 @@ void Task_ADC_Process(void const *argument) {
     vTaskDelay(pdMS_TO_TICKS(500)); 
     
     for(;;) {
-        // 计算两路温度
+        // 1. 计算两路温度
         int16_t t_10k_raw = adc_to_temperature_10k(adc_buffer[0]); 
         int16_t t_50k_raw = adc_to_temperature_50k(adc_buffer[1]); 
         
-        // 2. 直接把实际温度存到全局公告板上
+        // 2. 纯粹的原子锁写入 (绝对安全)
         SysState_Lock();
-        SysState_GetRawPtr()->VAR_CABINET_TEMP = t_10k_raw / 10.0f;
+        float temp_10k = t_10k_raw / 10.0f;
+        // 10K 探头同时给面板(柜温)和串口(蒸发温)使用
+        SysState_GetRawPtr()->VAR_CABINET_TEMP = temp_10k; 
+        SysState_GetRawPtr()->VAR_EVAP_TEMP    = temp_10k; 
+        // 50K 探头给排气/冷凝温使用
         SysState_GetRawPtr()->VAR_EXHAUST_TEMP = t_50k_raw / 10.0f;
         SysState_Unlock();
         
-        SysVarData_t temp_sensor_data;
-        // 1. 先把黑板上原有的数据都读出来，防止覆盖掉电压、液位等其他已写入的数据
-        SysState_GetSensor(&temp_sensor_data); 
-        
-        // 2. 把刚才采集的温度更新进去
-        temp_sensor_data.VAR_EVAP_TEMP    = g_temp_10k; // 10K 对应蒸发温度
-        temp_sensor_data.VAR_EXHAUST_TEMP = g_temp_50k; // 50K 对应排气温度
-        
-        // 3. 安全回写到系统黑板（底层会触发 Mutex 保护，多任务可以安全用）
-        SysState_UpdateSensor(&temp_sensor_data);
-        
-        // 4. 每 100ms 刷新一次
+        // 3. 每 100ms 刷新一次
         vTaskDelay(pdMS_TO_TICKS(100)); 
     }
 }
