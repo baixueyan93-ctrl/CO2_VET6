@@ -36,7 +36,7 @@
 #include "bsp_i2c_mutex.h" // I2C1 ���߻�����
 #include "sys_state.h"    //����ϵͳ״̬ͷ�ļ�
 #include "task_temp_ctrl.h"       // 温控主任务 (逻辑1+2+3)
-#include "bsp_relay.h"            // 继电器/输入信号BSP
+// #include "bsp_relay.h"         // 引脚确定后再启用
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -113,7 +113,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   BSP_I2C1_MutexInit();  // �������ȳ�ʼ��Ӳ��������
   SysState_Init();       // �����ڵ���������ǰ��ʼ��ȫ�������ֵ��ϵͳ��
-  BSP_Relay_Init();      // 初始化继电器/输入信号GPIO
+  // BSP_Relay_Init();   // 引脚确定后再启用
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */

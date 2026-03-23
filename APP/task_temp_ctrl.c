@@ -4,15 +4,18 @@
 #include "event_groups.h"
 #include "sys_state.h"
 #include "sys_config.h"
-#include "bsp_relay.h"
 
 /* ===========================================================================
- * 温控主任务 Task_TempCtrl
+ * 温控主任务 Task_TempCtrl  (纯逻辑层, 不含 BSP 引脚操作)
  *
  * 合并三个子逻辑, 统一在一个 200ms 周期循环内顺序执行:
  *   1. 停机异常逻辑告警 (最高优先, 先检查)
  *   2. 压缩机开机逻辑   (状态机驱动)
  *   3. 油壳加热逻辑     (根据压缩机状态联动)
+ *
+ * 输入: 全部来自 SysVarData_t (由 ADC/BSP 层写入)
+ * 输出: 只写 EventGroup 状态位 + g_AlarmFlags
+ *       实际 GPIO 驱动由 BSP 层根据状态位执行 (引脚确定后再加)
  * =========================================================================== */
 
 /* ===================================================================
@@ -29,7 +32,7 @@ typedef enum {
  *  逻辑1: 停机异常逻辑告警 (通知用户)
  *
  *  顺序检查: VDC欠压 → VAC缺相 → 变频器过流 → 变频器过热
- *  任一异常 → 关压缩机 + 置错误标志 + 通知用户
+ *  任一异常 → 置 ST_COMP_RUNNING=0 + 置错误标志 + 通知用户
  *  异常恢复 → 清对应错误标志
  * =================================================================== */
 static void shutdown_alarm_check(const SysVarData_t *sensor)
@@ -44,33 +47,32 @@ static void shutdown_alarm_check(const SysVarData_t *sensor)
         g_AlarmFlags &= ~ERR_VDC_LOW;       /* -EDC */
     }
 
-    /* 步骤2: VAC 错/断相 ? */
-    if (BSP_VAC_IsPhaseFault()) {
+    /* 步骤2: VAC 错/断相 ? (从 SysVarData_t 读取) */
+    if (sensor->HW_VAC_PHASE_FAULT) {
         g_AlarmFlags |= ERR_VAC_PHASE;      /* EAC */
         need_shutdown = true;
     } else {
         g_AlarmFlags &= ~ERR_VAC_PHASE;     /* -EAC */
     }
 
-    /* 步骤3: 变频器过流 ? */
-    if (BSP_INV_IsOverCurrent()) {
+    /* 步骤3: 变频器过流 ? (从 SysVarData_t 读取) */
+    if (sensor->HW_INV_OVERCURRENT) {
         g_AlarmFlags |= ERR_INV_OVERCURR;   /* EFI */
         need_shutdown = true;
     } else {
         g_AlarmFlags &= ~ERR_INV_OVERCURR;  /* -EFI */
     }
 
-    /* 步骤4: 变频器过热 ? */
-    if (BSP_INV_IsOverHeat()) {
+    /* 步骤4: 变频器过热 ? (从 SysVarData_t 读取) */
+    if (sensor->HW_INV_OVERHEAT) {
         g_AlarmFlags |= ERR_INV_OVERHEAT;   /* EFT */
         need_shutdown = true;
     } else {
         g_AlarmFlags &= ~ERR_INV_OVERHEAT;  /* -EFT */
     }
 
-    /* 任一异常 → 关机 + 通知用户 */
+    /* 任一异常 → 清压缩机运行标志 + 通知用户 */
     if (need_shutdown) {
-        BSP_Comp_Off();
         xEventGroupClearBits(SysEventGroup, ST_COMP_RUNNING);
         g_AlarmFlags |= WARN_NOTIFY_USER;
     }
@@ -107,7 +109,7 @@ static void pid_adjust(const SysVarData_t *sensor)
 /* ===================================================================
  *  逻辑2: 压缩机开机逻辑 (状态机)
  *
- *  IDLE     → 等 ST_SYSTEM_ON, 开机 F=125
+ *  IDLE     → 等 ST_SYSTEM_ON, 置 ST_COMP_RUNNING
  *  STARTING → 热车 C20 计时, 到时进 PID
  *  RUNNING  → PID 调节
  *  STOPPED  → 异常停机, 等错误清除回 IDLE
@@ -127,8 +129,7 @@ static void compressor_control(const SysVarData_t *sensor,
             *state = COMP_STARTING;
             *warmup_cnt = 0;
 
-            /* 开启压缩机, F = 125 */
-            BSP_Comp_On();
+            /* 置压缩机运行标志, F = 125 */
             xEventGroupSetBits(SysEventGroup, ST_COMP_RUNNING);
             xEventGroupClearBits(SysEventGroup, ST_WARMUP_DONE);
 
@@ -140,7 +141,6 @@ static void compressor_control(const SysVarData_t *sensor,
 
     case COMP_STARTING:
         if (has_error) {
-            BSP_Comp_Off();
             xEventGroupClearBits(SysEventGroup, ST_COMP_RUNNING);
             *state = COMP_STOPPED;
             break;
@@ -157,7 +157,6 @@ static void compressor_control(const SysVarData_t *sensor,
 
     case COMP_RUNNING:
         if (has_error || !(sys_bits & ST_SYSTEM_ON)) {
-            BSP_Comp_Off();
             xEventGroupClearBits(SysEventGroup, ST_COMP_RUNNING);
             *state = COMP_STOPPED;
             break;
@@ -167,7 +166,6 @@ static void compressor_control(const SysVarData_t *sensor,
         break;
 
     case COMP_STOPPED:
-        BSP_Comp_Off();
         xEventGroupClearBits(SysEventGroup, ST_COMP_RUNNING);
         xEventGroupClearBits(SysEventGroup, ST_WARMUP_DONE);
         if (!has_error) {
@@ -180,9 +178,9 @@ static void compressor_control(const SysVarData_t *sensor,
 /* ===================================================================
  *  逻辑3: 油壳加热逻辑
  *
- *  压缩机运行     → 油壳加热关
- *  压缩机停机 + 环境 ≤ 10°C → 油壳加热开
- *  压缩机停机 + 环境 > 10°C  → 油壳加热关
+ *  压缩机运行     → 油壳加热关 (清 ST_OIL_HEAT_ON)
+ *  压缩机停机 + 环境 ≤ 10°C → 油壳加热开 (置 ST_OIL_HEAT_ON)
+ *  压缩机停机 + 环境 > 10°C  → 油壳加热关 (清 ST_OIL_HEAT_ON)
  * =================================================================== */
 static void oil_heater_control(const SysVarData_t *sensor)
 {
@@ -191,17 +189,14 @@ static void oil_heater_control(const SysVarData_t *sensor)
 
     if (comp_running) {
         /* 压缩机开机 → 油壳加热关 */
-        BSP_OilHeater_Off();
         xEventGroupClearBits(SysEventGroup, ST_OIL_HEAT_ON);
     } else {
         /* 压缩机未开机 → 判断环境温度 */
         float ambient = sensor->VAR_SHT30_TEMP;
 
         if (ambient <= SET_OIL_HEAT_TEMP) {
-            BSP_OilHeater_On();
             xEventGroupSetBits(SysEventGroup, ST_OIL_HEAT_ON);
         } else {
-            BSP_OilHeater_Off();
             xEventGroupClearBits(SysEventGroup, ST_OIL_HEAT_ON);
         }
     }
