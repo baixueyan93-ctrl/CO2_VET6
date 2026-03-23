@@ -8,23 +8,23 @@
  *  鹭宫 VKV 电子膨胀阀 步进电机驱动 (DC12V, 单极性4相)
  *
  *  硬件连接 (V13 原理图 XH-5AW EXV0):
- *    PM0A (B-) = PC11  (PM01)
- *    PM0B (A-) = PC10  (PM02)
- *    PM0C (B+) = PC9   (PM03)
- *    PM0D (A+) = PC8   (PM04)
+ *    PM0A (B-) = PD11  (PM01)
+ *    PM0B (A-) = PD10  (PM02)
+ *    PM0C (B+) = PD9   (PM03)
+ *    PM0D (A+) = PD8   (PM04)
  *
  *  信号链: MCU GPIO -> TLP291-4 光耦 (U10) -> ULN2803A (U14) -> EXV0
  *  逻辑: GPIO HIGH = 线圈通电
  * =================================================================== */
 
 /* --- 引脚定义 --- */
-#define EXV0_PM0A_PORT   GPIOC          /* B-  */
+#define EXV0_PM0A_PORT   GPIOD          /* B-  */
 #define EXV0_PM0A_PIN    GPIO_PIN_11
-#define EXV0_PM0B_PORT   GPIOC          /* A-  */
+#define EXV0_PM0B_PORT   GPIOD          /* A-  */
 #define EXV0_PM0B_PIN    GPIO_PIN_10
-#define EXV0_PM0C_PORT   GPIOC          /* B+  */
+#define EXV0_PM0C_PORT   GPIOD          /* B+  */
 #define EXV0_PM0C_PIN    GPIO_PIN_9
-#define EXV0_PM0D_PORT   GPIOC          /* A+  */
+#define EXV0_PM0D_PORT   GPIOD          /* A+  */
 #define EXV0_PM0D_PIN    GPIO_PIN_8
 
 /* --- 阀门参数 --- */
