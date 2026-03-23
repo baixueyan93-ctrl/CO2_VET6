@@ -33,7 +33,7 @@
 //#include "task_XKC_Y20_V.h"  // О©╫О©╫О©╫О©╫ XKC_Y20_V О©╫О©╫О©╫О©╫О©╫О©╫р╣О©╫О©╫
 #include "task_adc.h"    // О©╫О©╫О©╫О©╫ ADC р╣О©╫О©╫
 #include "task_sht30.h"   // SHT30 О©╫О©╫й╙О©╫х╡и╪О©╫
-#include "task_exv.h"     // Г■╣Е╜░Х├╗Х┐─И≤─Ф╣▀Х╞∙
+#include "task_exv.h"     // ╣ГвсеРум╥╖╡Бйт
 #include "bsp_i2c_mutex.h" // I2C1 О©╫О©╫О©╫ъ╩О©╫О©╫О©╫О©╫О©╫
 #include "sys_state.h"    //О©╫О©╫О©╫О©╫о╣мЁв╢л╛м╥О©╫д╪О©╫
 /* USER CODE END Includes */
@@ -148,7 +148,7 @@ void MX_FREERTOS_Init(void) {
   Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* Г■╣Е╜░Х├╗Х┐─И≤─Ф╣▀Х╞∙Д╩╩Е┼║ (Ф≥╝И─ Д╪≤Е┘┬Г╨╖, 256Е╜≈Ф═┬) */
+  /* ╣ГвсеРум╥╖╡БйтД╩╩Е┼║ (Ф≥╝И─ Д╪≤Е┘┬Г╨╖, 256Е╜≈Ф═┬) */
   osThreadDef(Task_EXV, StartTask_EXV, osPriorityNormal, 0, 256);
   Task_EXVHandle = osThreadCreate(osThread(Task_EXV), NULL);
   /* USER CODE END RTOS_THREADS */

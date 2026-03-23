@@ -5,19 +5,19 @@
 #include <stdint.h>
 
 /* ===================================================================
- *  é¹­å®« VKV ç”µå­è†¨èƒ€é˜€ æ­¥è¿›ç”µæœºé©±åŠ¨ (DC12V, å•ææ€§4ç›¸)
+ *  ğØ¹¬ VKV µç×ÓÅòÕÍ·§ ²½½øµç»úÇı¶¯ (DC12V, µ¥¼«ĞÔ4Ïà)
  *
- *  ç¡¬ä»¶è¿æ¥ (V13 åŸç†å›¾ XH-5AW EXV0):
+ *  Ó²¼şÁ¬½Ó (V13 Ô­ÀíÍ¼ XH-5AW EXV0):
  *    PM0A (B-) = PD11  (PM01)
  *    PM0B (A-) = PD10  (PM02)
  *    PM0C (B+) = PD9   (PM03)
  *    PM0D (A+) = PD8   (PM04)
  *
- *  ä¿¡å·é“¾: MCU GPIO -> TLP291-4 å…‰è€¦ (U10) -> ULN2803A (U14) -> EXV0
- *  é€»è¾‘: GPIO HIGH = çº¿åœˆé€šç”µ
+ *  ĞÅºÅÁ´: MCU GPIO -> TLP291-4 ¹âñî (U10) -> ULN2803A (U14) -> EXV0
+ *  Âß¼­: GPIO HIGH = ÏßÈ¦Í¨µç
  * =================================================================== */
 
-/* --- å¼•è„šå®šä¹‰ --- */
+/* --- Òı½Å¶¨Òå --- */
 #define EXV0_PM0A_PORT   GPIOD          /* B-  */
 #define EXV0_PM0A_PIN    GPIO_PIN_11
 #define EXV0_PM0B_PORT   GPIOD          /* A-  */
@@ -27,18 +27,18 @@
 #define EXV0_PM0D_PORT   GPIOD          /* A+  */
 #define EXV0_PM0D_PIN    GPIO_PIN_8
 
-/* --- é˜€é—¨å‚æ•° --- */
-#define EXV_TOTAL_STEPS     500     /* VKV å…¨è¡Œç¨‹æ­¥æ•°              */
-#define EXV_INIT_CLOSE_STEPS 550    /* åˆå§‹åŒ–å…³é˜€æ­¥æ•°(å¤šèµ°50æ­¥ç¡®ä¿å…¨å…³) */
-#define EXV_STEP_DELAY_MS    20     /* æ¯æ­¥å»¶æ—¶ (ms), çº¦50 PPS     */
+/* --- ·§ÃÅ²ÎÊı --- */
+#define EXV_TOTAL_STEPS     500     /* VKV È«ĞĞ³Ì²½Êı              */
+#define EXV_INIT_CLOSE_STEPS 550    /* ³õÊ¼»¯¹Ø·§²½Êı(¶à×ß50²½È·±£È«¹Ø) */
+#define EXV_STEP_DELAY_MS    20     /* Ã¿²½ÑÓÊ± (ms), Ô¼50 PPS     */
 
-/* --- æ–¹å‘ --- */
+/* --- ·½Ïò --- */
 typedef enum {
-    EXV_DIR_CLOSE = 0,   /* å…³é˜€ (CW)  */
-    EXV_DIR_OPEN  = 1    /* å¼€é˜€ (CCW) */
+    EXV_DIR_CLOSE = 0,   /* ¹Ø·§ (CW)  */
+    EXV_DIR_OPEN  = 1    /* ¿ª·§ (CCW) */
 } EXV_Direction_t;
 
-/* --- æ¥å£å‡½æ•° --- */
+/* --- ½Ó¿Úº¯Êı --- */
 void     BSP_EXV_Init(void);
 void     BSP_EXV_DeEnergize(void);
 void     BSP_EXV_Step(EXV_Direction_t dir, uint16_t steps, uint16_t delay_ms);

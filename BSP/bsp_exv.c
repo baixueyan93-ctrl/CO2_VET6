@@ -3,25 +3,25 @@
 #include "task.h"
 
 /* ===================================================================
- *  é¹­å®« VKV ç”µå­è†¨èƒ€é˜€ æ­¥è¿›ç”µæœºé©±åŠ¨
+ *  ğØ¹¬ VKV µç×ÓÅòÕÍ·§ ²½½øµç»úÇı¶¯
  *
- *  å•ææ€§4ç›¸æ­¥è¿›ç”µæœº, 2ç›¸åŠ±ç£å…¨æ­¥è¿›é©±åŠ¨
- *  æ¯æ­¥åŒæ—¶å¯¼é€šç›¸é‚»ä¸¤ç›¸, äº§ç”Ÿæ›´å¤§æ‰­çŸ©
+ *  µ¥¼«ĞÔ4Ïà²½½øµç»ú, 2ÏàÀø´ÅÈ«²½½øÇı¶¯
+ *  Ã¿²½Í¬Ê±µ¼Í¨ÏàÁÚÁ½Ïà, ²úÉú¸ü´óÅ¤¾Ø
  *
- *  å…¨æ­¥è¿›åºåˆ— (2ç›¸å¯¼é€š):
+ *  È«²½½øĞòÁĞ (2Ïàµ¼Í¨):
  *    Step 0: A+(PM0D)=1, B+(PM0C)=1, A-(PM0B)=0, B-(PM0A)=0
  *    Step 1: A-(PM0B)=1, B+(PM0C)=1, A+(PM0D)=0, B-(PM0A)=0
  *    Step 2: A-(PM0B)=1, B-(PM0A)=1, A+(PM0D)=0, B+(PM0C)=0
  *    Step 3: A+(PM0D)=1, B-(PM0A)=1, A-(PM0B)=0, B+(PM0C)=0
  * =================================================================== */
 
-/* å½“å‰ä½ç½® (0 = å…¨å…³, EXV_TOTAL_STEPS = å…¨å¼€) */
+/* µ±Ç°Î»ÖÃ (0 = È«¹Ø, EXV_TOTAL_STEPS = È«¿ª) */
 static volatile uint16_t s_exv_position = 0;
 
-/* å½“å‰ç›¸åºç´¢å¼• (0~3) */
+/* µ±Ç°ÏàĞòË÷Òı (0~3) */
 static volatile uint8_t s_phase_index = 0;
 
-/* ç›¸åºè¡¨: æ¯ä¸ªå…ƒç´  = {PM0A(B-), PM0B(A-), PM0C(B+), PM0D(A+)} */
+/* ÏàĞò±í: Ã¿¸öÔªËØ = {PM0A(B-), PM0B(A-), PM0C(B+), PM0D(A+)} */
 static const uint8_t PHASE_TABLE[4][4] = {
     /* PM0A  PM0B  PM0C  PM0D */
     {  0,    0,    1,    1  },  /* Step 0: A+ & B+ */
@@ -46,21 +46,21 @@ static void exv_set_phase(uint8_t phase_idx)
 }
 
 /* ===================================================================
- *  BSP_EXV_Init - åˆå§‹åŒ– GPIO å¼•è„š (æ¨æŒ½è¾“å‡º, é»˜è®¤ä½ç”µå¹³)
+ *  BSP_EXV_Init - ³õÊ¼»¯ GPIO Òı½Å (ÍÆÍìÊä³ö, Ä¬ÈÏµÍµçÆ½)
  * =================================================================== */
 void BSP_EXV_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-    /* ä½¿èƒ½ GPIOD æ—¶é’Ÿ */
+    /* Ê¹ÄÜ GPIOD Ê±ÖÓ */
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
-    /* å…ˆæ‹‰ä½æ‰€æœ‰å¼•è„š */
+    /* ÏÈÀ­µÍËùÓĞÒı½Å */
     HAL_GPIO_WritePin(GPIOD,
         EXV0_PM0A_PIN | EXV0_PM0B_PIN | EXV0_PM0C_PIN | EXV0_PM0D_PIN,
         GPIO_PIN_RESET);
 
-    /* é…ç½® PD8, PD9, PD10, PD11 ä¸ºæ¨æŒ½è¾“å‡º */
+    /* ÅäÖÃ PD8, PD9, PD10, PD11 ÎªÍÆÍìÊä³ö */
     GPIO_InitStruct.Pin   = EXV0_PM0A_PIN | EXV0_PM0B_PIN |
                             EXV0_PM0C_PIN | EXV0_PM0D_PIN;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
@@ -73,7 +73,7 @@ void BSP_EXV_Init(void)
 }
 
 /* ===================================================================
- *  BSP_EXV_DeEnergize - æ–­ç”µæ‰€æœ‰çº¿åœˆ (çœç”µ, å‡å°‘å‘çƒ­)
+ *  BSP_EXV_DeEnergize - ¶ÏµçËùÓĞÏßÈ¦ (Ê¡µç, ¼õÉÙ·¢ÈÈ)
  * =================================================================== */
 void BSP_EXV_DeEnergize(void)
 {
@@ -83,10 +83,10 @@ void BSP_EXV_DeEnergize(void)
 }
 
 /* ===================================================================
- *  BSP_EXV_Step - æ‰§è¡ŒæŒ‡å®šæ­¥æ•°
+ *  BSP_EXV_Step - Ö´ĞĞÖ¸¶¨²½Êı
  *  @param dir      : EXV_DIR_OPEN / EXV_DIR_CLOSE
- *  @param steps    : æ­¥æ•°
- *  @param delay_ms : æ¯æ­¥å»¶æ—¶ (ms), å»ºè®® >= 15
+ *  @param steps    : ²½Êı
+ *  @param delay_ms : Ã¿²½ÑÓÊ± (ms), ½¨Òé >= 15
  * =================================================================== */
 void BSP_EXV_Step(EXV_Direction_t dir, uint16_t steps, uint16_t delay_ms)
 {
@@ -107,7 +107,7 @@ void BSP_EXV_Step(EXV_Direction_t dir, uint16_t steps, uint16_t delay_ms)
 }
 
 /* ===================================================================
- *  BSP_EXV_GetPosition - è·å–å½“å‰ä½ç½® (æ­¥æ•°)
+ *  BSP_EXV_GetPosition - »ñÈ¡µ±Ç°Î»ÖÃ (²½Êı)
  * =================================================================== */
 uint16_t BSP_EXV_GetPosition(void)
 {
@@ -115,7 +115,7 @@ uint16_t BSP_EXV_GetPosition(void)
 }
 
 /* ===================================================================
- *  BSP_EXV_SetPosition - ç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®
+ *  BSP_EXV_SetPosition - ÒÆ¶¯µ½Ä¿±êÎ»ÖÃ
  * =================================================================== */
 void BSP_EXV_SetPosition(uint16_t target_steps, uint16_t delay_ms)
 {
@@ -132,11 +132,11 @@ void BSP_EXV_SetPosition(uint16_t target_steps, uint16_t delay_ms)
 }
 
 /* ===================================================================
- *  BSP_EXV_ResetToZero - å½’é›¶: å…³é˜€ 550 æ­¥ (ç¡®ä¿æœºæ¢°å…¨å…³)
+ *  BSP_EXV_ResetToZero - ¹éÁã: ¹Ø·§ 550 ²½ (È·±£»úĞµÈ«¹Ø)
  * =================================================================== */
 void BSP_EXV_ResetToZero(void)
 {
-    /* ä¸æ£€æŸ¥ s_exv_position, ç›´æ¥å¤šæ­¥å…³é˜€ç¡®ä¿å½’é›¶ */
+    /* ²»¼ì²é s_exv_position, Ö±½Ó¶à²½¹Ø·§È·±£¹éÁã */
     for (uint16_t i = 0; i < EXV_INIT_CLOSE_STEPS; i++) {
         s_phase_index = (s_phase_index + 3) & 0x03;
         exv_set_phase(s_phase_index);
