@@ -148,7 +148,7 @@ void MX_FREERTOS_Init(void) {
   Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* 电子膨胀阀测试浠诲姟 (鏅�氫紭鍏堢骇, 256瀛楁爤) */
+  /* 电子膨胀阀测试任务 (普通优先级, 256字栈) */
   osThreadDef(Task_EXV, StartTask_EXV, osPriorityNormal, 0, 256);
   Task_EXVHandle = osThreadCreate(osThread(Task_EXV), NULL);
   /* USER CODE END RTOS_THREADS */
