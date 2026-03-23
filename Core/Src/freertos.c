@@ -26,15 +26,19 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "task_led.h"    // ÒıÈë LED ÒµÎñ
-//#include "task_buzzer.h" // ÒıÈë ·äÃùÆ÷ ÒµÎñ
-#include "task_panel.h"  // ÒıÈë Ãæ°å ÒµÎñ
-#include "task_rs485_log.h"// ÒıÈë Í¨ĞÅ ÒµÎñ
-//#include "task_XKC_Y20_V.h"  // ÒıÈë XKC_Y20_V ´«¸ĞÆ÷ÒµÎñ
-#include "task_adc.h"    // ÒıÈë ADC ÒµÎñ
-#include "task_sht30.h"   // SHT30 ÎÂÊª¶È²É¼¯
-#include "bsp_i2c_mutex.h" // I2C1 ×ÜÏß»¥³âËø
-#include "sys_state.h"    //ÒıÈëÏµÍ³×´Ì¬Í·ÎÄ¼ş
+#include "task_led.h"    // ï¿½ï¿½ï¿½ï¿½ LED Òµï¿½ï¿½
+//#include "task_buzzer.h" // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Òµï¿½ï¿½
+#include "task_panel.h"  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Òµï¿½ï¿½
+#include "task_rs485_log.h"// ï¿½ï¿½ï¿½ï¿½ Í¨ï¿½ï¿½ Òµï¿½ï¿½
+//#include "task_XKC_Y20_V.h"  // ï¿½ï¿½ï¿½ï¿½ XKC_Y20_V ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½
+#include "task_adc.h"    // ï¿½ï¿½ï¿½ï¿½ ADC Òµï¿½ï¿½
+#include "task_sht30.h"   // SHT30 ï¿½ï¿½Êªï¿½È²É¼ï¿½
+#include "bsp_i2c_mutex.h" // I2C1 ï¿½ï¿½ï¿½ß»ï¿½ï¿½ï¿½ï¿½ï¿½
+#include "sys_state.h"    //ï¿½ï¿½ï¿½ï¿½ÏµÍ³×´Ì¬Í·ï¿½Ä¼ï¿½
+#include "task_shutdown_alarm.h"  // é€»è¾‘1: åœæœºå¼‚å¸¸é€»è¾‘å‘Šè­¦
+#include "task_compressor.h"      // é€»è¾‘2: å‹ç¼©æœºå¼€æœºé€»è¾‘
+#include "task_oil_heater.h"      // é€»è¾‘3: æ²¹å£³åŠ çƒ­é€»è¾‘
+#include "bsp_relay.h"            // ç»§ç”µå™¨/è¾“å…¥ä¿¡å·BSP
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +65,9 @@ osThreadId Task_RS485Handle;
 osThreadId TaskPanelHandle;
 osThreadId Task_ADCHandle;
 osThreadId Task_SHT30Handle;
+osThreadId Task_ShutdownAlarmHandle;
+osThreadId Task_CompressorHandle;
+osThreadId Task_OilHeaterHandle;
 osMutexId EEPROM_MutexHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,6 +80,9 @@ void StartTask_RS485(void const * argument);
 void StartTask03(void const * argument);
 void StartTask_ADC(void const * argument);
 void StartTask_SHT30(void const * argument);
+void StartTask_ShutdownAlarm(void const * argument);
+void StartTask_Compressor(void const * argument);
+void StartTask_OilHeater(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -107,8 +117,9 @@ void MX_FREERTOS_Init(void) {
   EEPROM_MutexHandle = osMutexCreate(osMutex(EEPROM_Mutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  BSP_I2C1_MutexInit();  // ±ØĞë×îÏÈ³õÊ¼»¯Ó²¼ş×ÜÏßËø
-  SysState_Init();       // ±ØĞëÔÚµ÷¶ÈÆ÷Æô¶¯Ç°³õÊ¼»¯È«¾ÖÊı¾İ×ÖµäºÍÏµÍ³Ëø
+  BSP_I2C1_MutexInit();  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È³ï¿½Ê¼ï¿½ï¿½Ó²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  SysState_Init();       // ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ê¼ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ÏµÍ³ï¿½ï¿½
+  BSP_Relay_Init();      // åˆå§‹åŒ–ç»§ç”µå™¨/è¾“å…¥ä¿¡å·GPIO
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -145,7 +156,17 @@ void MX_FREERTOS_Init(void) {
   Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-   /* SHT30 ÎÂÊª¶È²É¼¯ÈÎÎñ (1ÃëÖÜÆÚ, µÍÓÅÏÈ¼¶, 256×ÖÕ») */
+  /* é€»è¾‘1: åœæœºå¼‚å¸¸é€»è¾‘å‘Šè­¦ (é«˜ä¼˜å…ˆçº§, 200mså‘¨æœŸ, 256æ ˆ) */
+  osThreadDef(Task_ShutdownAlarm, StartTask_ShutdownAlarm, osPriorityHigh, 0, 256);
+  Task_ShutdownAlarmHandle = osThreadCreate(osThread(Task_ShutdownAlarm), NULL);
+
+  /* é€»è¾‘2: å‹ç¼©æœºå¼€æœºé€»è¾‘ (æ­£å¸¸ä¼˜å…ˆçº§, 200mså‘¨æœŸ, 512æ ˆ) */
+  osThreadDef(Task_Compressor, StartTask_Compressor, osPriorityNormal, 0, 512);
+  Task_CompressorHandle = osThreadCreate(osThread(Task_Compressor), NULL);
+
+  /* é€»è¾‘3: æ²¹å£³åŠ çƒ­é€»è¾‘ (ä½ä¼˜å…ˆçº§, 500mså‘¨æœŸ, 256æ ˆ) */
+  osThreadDef(Task_OilHeater, StartTask_OilHeater, osPriorityBelowNormal, 0, 256);
+  Task_OilHeaterHandle = osThreadCreate(osThread(Task_OilHeater), NULL);
 
   /* USER CODE END RTOS_THREADS */
 
@@ -162,8 +183,8 @@ void StartTask_LED(void const * argument)
 {
   /* USER CODE BEGIN StartTask_LED */
   /* Infinite loop */
-Task_LED_Process(argument); // Ö±½Óµ÷ÓÃÍâ²¿ÎÄ¼ş·â×°ºÃµÄ´úÂë
-  for(;;) { osDelay(1); }     // ¶µµ×±£»¤
+Task_LED_Process(argument); // Ö±ï¿½Óµï¿½ï¿½ï¿½ï¿½â²¿ï¿½Ä¼ï¿½ï¿½ï¿½×°ï¿½ÃµÄ´ï¿½ï¿½ï¿½
+  for(;;) { osDelay(1); }     // ï¿½ï¿½ï¿½×±ï¿½ï¿½ï¿½
   /* USER CODE END StartTask_LED */
 }
 
@@ -178,8 +199,8 @@ void StartTask_RS485(void const * argument)
 {
   /* USER CODE BEGIN StartTask_RS485 */
   /* Infinite loop */
-Task_RS485Log_Process(argument); // ¹ÒÔØºËĞÄÒµÎñ
-  for(;;) { osDelay(1); }          // ¶µµ×±£»¤
+Task_RS485Log_Process(argument); // ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½Òµï¿½ï¿½
+  for(;;) { osDelay(1); }          // ï¿½ï¿½ï¿½×±ï¿½ï¿½ï¿½
   /* USER CODE END StartTask_RS485 */
 }
 
@@ -189,13 +210,13 @@ Task_RS485Log_Process(argument); // ¹ÒÔØºËĞÄÒµÎñ
 * @param argument: Not used
 * @retval None
 */
-extern void Task_Panel_Process(void const *argument); // ÒıÈëÉùÃ÷
+extern void Task_Panel_Process(void const *argument); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 /* USER CODE END Header_StartTask03 */
 void StartTask03(void const * argument)
 {
   /* USER CODE BEGIN StartTask03 */
   /* Infinite loop */
-Task_Panel_Process(argument); // ¹ÒÔØ×îĞÂĞ´µÄÆÁÄ»¿ØÖÆÏµÍ³£¡
+Task_Panel_Process(argument); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½
   for(;;) { osDelay(1); }
   /* USER CODE END StartTask03 */
 }
@@ -210,7 +231,7 @@ Task_Panel_Process(argument); // ¹ÒÔØ×îĞÂĞ´µÄÆÁÄ»¿ØÖÆÏµÍ³£¡
 void StartTask_ADC(void const * argument)
 {
   /* USER CODE BEGIN StartTask_ADC */
-	// ×¢ÈëÁé»ê£ºµ÷ÓÃÔÛÃÇĞ´ºÃµÄ ADC ²âÎÂ´óÑ­»·£¡
+	// ×¢ï¿½ï¿½ï¿½ï¿½ê£ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½Ãµï¿½ ADC ï¿½ï¿½ï¿½Â´ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½
   Task_ADC_Process(argument);
   /* Infinite loop */
   for(;;)
@@ -231,7 +252,7 @@ void StartTask_SHT30(void const * argument)
 {
   /* USER CODE BEGIN StartTask_SHT30 */
   /* Infinite loop */
-    Task_SHT30_Process(argument);  // µ÷ÓÃÄãĞ´ºÃµÄÒµÎñº¯Êı
+    Task_SHT30_Process(argument);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½Ãµï¿½Òµï¿½ï¿½ï¿½ï¿½
 	for(;;)
   {
     osDelay(1);
@@ -241,6 +262,27 @@ void StartTask_SHT30(void const * argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+
+/* === é€»è¾‘1: åœæœºå¼‚å¸¸é€»è¾‘å‘Šè­¦ === */
+void StartTask_ShutdownAlarm(void const * argument)
+{
+  Task_ShutdownAlarm_Process(argument);
+  for(;;) { osDelay(1); }
+}
+
+/* === é€»è¾‘2: å‹ç¼©æœºå¼€æœºé€»è¾‘ === */
+void StartTask_Compressor(void const * argument)
+{
+  Task_Compressor_Process(argument);
+  for(;;) { osDelay(1); }
+}
+
+/* === é€»è¾‘3: æ²¹å£³åŠ çƒ­é€»è¾‘ === */
+void StartTask_OilHeater(void const * argument)
+{
+  Task_OilHeater_Process(argument);
+  for(;;) { osDelay(1); }
+}
 
 /* USER CODE END Application */
 
