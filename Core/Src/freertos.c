@@ -35,9 +35,7 @@
 #include "task_sht30.h"   // SHT30 ��ʪ�Ȳɼ�
 #include "bsp_i2c_mutex.h" // I2C1 ���߻�����
 #include "sys_state.h"    //����ϵͳ״̬ͷ�ļ�
-#include "task_shutdown_alarm.h"  // 逻辑1: 停机异常逻辑告警
-#include "task_compressor.h"      // 逻辑2: 压缩机开机逻辑
-#include "task_oil_heater.h"      // 逻辑3: 油壳加热逻辑
+#include "task_temp_ctrl.h"       // 温控主任务 (逻辑1+2+3)
 #include "bsp_relay.h"            // 继电器/输入信号BSP
 /* USER CODE END Includes */
 
@@ -65,9 +63,7 @@ osThreadId Task_RS485Handle;
 osThreadId TaskPanelHandle;
 osThreadId Task_ADCHandle;
 osThreadId Task_SHT30Handle;
-osThreadId Task_ShutdownAlarmHandle;
-osThreadId Task_CompressorHandle;
-osThreadId Task_OilHeaterHandle;
+osThreadId Task_TempCtrlHandle;
 osMutexId EEPROM_MutexHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,9 +76,7 @@ void StartTask_RS485(void const * argument);
 void StartTask03(void const * argument);
 void StartTask_ADC(void const * argument);
 void StartTask_SHT30(void const * argument);
-void StartTask_ShutdownAlarm(void const * argument);
-void StartTask_Compressor(void const * argument);
-void StartTask_OilHeater(void const * argument);
+void StartTask_TempCtrl(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -156,17 +150,9 @@ void MX_FREERTOS_Init(void) {
   Task_SHT30Handle = osThreadCreate(osThread(Task_SHT30), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* 逻辑1: 停机异常逻辑告警 (高优先级, 200ms周期, 256栈) */
-  osThreadDef(Task_ShutdownAlarm, StartTask_ShutdownAlarm, osPriorityHigh, 0, 256);
-  Task_ShutdownAlarmHandle = osThreadCreate(osThread(Task_ShutdownAlarm), NULL);
-
-  /* 逻辑2: 压缩机开机逻辑 (正常优先级, 200ms周期, 512栈) */
-  osThreadDef(Task_Compressor, StartTask_Compressor, osPriorityNormal, 0, 512);
-  Task_CompressorHandle = osThreadCreate(osThread(Task_Compressor), NULL);
-
-  /* 逻辑3: 油壳加热逻辑 (低优先级, 500ms周期, 256栈) */
-  osThreadDef(Task_OilHeater, StartTask_OilHeater, osPriorityBelowNormal, 0, 256);
-  Task_OilHeaterHandle = osThreadCreate(osThread(Task_OilHeater), NULL);
+  /* 温控主任务: 逻辑1停机告警 + 逻辑2压缩机 + 逻辑3油壳加热 (高优先级, 200ms周期, 512栈) */
+  osThreadDef(Task_TempCtrl, StartTask_TempCtrl, osPriorityHigh, 0, 512);
+  Task_TempCtrlHandle = osThreadCreate(osThread(Task_TempCtrl), NULL);
 
   /* USER CODE END RTOS_THREADS */
 
@@ -263,24 +249,10 @@ void StartTask_SHT30(void const * argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
-/* === 逻辑1: 停机异常逻辑告警 === */
-void StartTask_ShutdownAlarm(void const * argument)
+/* === 温控主任务 (逻辑1+2+3) === */
+void StartTask_TempCtrl(void const * argument)
 {
-  Task_ShutdownAlarm_Process(argument);
-  for(;;) { osDelay(1); }
-}
-
-/* === 逻辑2: 压缩机开机逻辑 === */
-void StartTask_Compressor(void const * argument)
-{
-  Task_Compressor_Process(argument);
-  for(;;) { osDelay(1); }
-}
-
-/* === 逻辑3: 油壳加热逻辑 === */
-void StartTask_OilHeater(void const * argument)
-{
-  Task_OilHeater_Process(argument);
+  Task_TempCtrl_Process(argument);
   for(;;) { osDelay(1); }
 }
 
