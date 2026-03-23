@@ -1326,6 +1326,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\task_sht30.c</FilePath>
             </File>
+            <File>
+              <FileName>task_exv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\task_exv.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1360,6 +1365,11 @@
               <FileName>bsp_i2c_mutex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\bsp_i2c_mutex.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_exv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_exv.c</FilePath>
             </File>
           </Files>
         </Group>
