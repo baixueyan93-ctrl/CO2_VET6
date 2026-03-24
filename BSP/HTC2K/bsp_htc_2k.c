@@ -18,11 +18,10 @@ static void HTC_DelayUs(uint32_t us) {
     while(delay--) { __NOP(); }
 }
 
-// Start�ź�
+// Start信号 (与原始TM1637.C一致：CLK保持高，DIO从高拉低)
 static void TM1637_Start(void) {
     HTC_CLK(1); HTC_DIO(1); HTC_DelayUs(2);
-    HTC_DIO(0); HTC_DelayUs(2); 
-    HTC_CLK(0);
+    HTC_DIO(0);
 }
 
 // Stop�ź�
@@ -53,14 +52,32 @@ static void TM1637_Write_Byte(uint8_t dat) {
     }
 }
 
-// ������ (����ԭ���߼�)
+// 读DIO前切换为输入模式，读完切回推挽输出
+static void HTC_DIO_SetInput(void) {
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = HTC_DIO_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(HTC_DIO_PORT, &GPIO_InitStruct);
+}
+
+static void HTC_DIO_SetOutput(void) {
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = HTC_DIO_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(HTC_DIO_PORT, &GPIO_InitStruct);
+}
+
+// 按键扫描 (推挽模式下需切换DIO方向)
 uint8_t BSP_HTC2K_ReadKeys(void) {
     uint8_t rekey = 0, i;
     taskENTER_CRITICAL();
     TM1637_Start();
     TM1637_Write_Byte(0x42);
     TM1637_Ask();
-    HTC_DIO(1);
+    HTC_DIO_SetInput();  // 切换DIO为输入
     for(i = 0; i < 8; i++) {
         HTC_CLK(0);
         rekey = rekey >> 1;
@@ -69,6 +86,7 @@ uint8_t BSP_HTC2K_ReadKeys(void) {
         if(HTC_READ_DIO()) rekey |= 0x80;
         HTC_DelayUs(20);
     }
+    HTC_DIO_SetOutput(); // 切回输出
     TM1637_Ask();
     TM1637_Stop();
     taskEXIT_CRITICAL();
@@ -78,10 +96,10 @@ uint8_t BSP_HTC2K_ReadKeys(void) {
 // ��ʼ��
 void BSP_HTC2K_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    __HAL_RCC_GPIOB_CLK_ENABLE(); // ����ʱ��
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     GPIO_InitStruct.Pin = HTC_CLK_PIN | HTC_DIO_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD; 
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;   // 推挽输出，与原始代码一致
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(HTC_CLK_PORT, &GPIO_InitStruct);
     HTC_CLK(1); HTC_DIO(1);
