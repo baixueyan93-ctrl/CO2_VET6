@@ -1,6 +1,8 @@
 #include "bsp_htc_2k.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
-// ³§¼ÒÔ­°æ¶ÎÂë±í
+// ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 const uint8_t SmgTab[] = {
     0xFC, 0x60, 0xDA, 0xF2, 0x66, 0xB6, 0xBE, 0xE0, 0xFE, 0xF6,
     0xEE, 0x3E, 0x9C, 0x7A, 0x9E, 0x8E, 0x6E, 0x1C, 0x3A, 0xCE, 
@@ -9,21 +11,21 @@ const uint8_t SmgTab[] = {
 
 icon_type_t g_IconSet = {0};
 
-// ¡¾ºËÐÄ¸ÄÔì¡¿£ºÊÊÅä STM32F407 168MHz µÄ°²È«Î¢ÃëÑÓÊ±
-// ³¹µ×¸ÉµôÕýµãÔ­×ÓµÄ delay_us£¬·ÀÖ¹Óë FreeRTOS ³åÍ»£¡
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ì¡¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ STM32F407 168MHz ï¿½Ä°ï¿½È«Î¢ï¿½ï¿½ï¿½ï¿½Ê±
+// ï¿½ï¿½ï¿½×¸Éµï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½Óµï¿½ delay_usï¿½ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ FreeRTOS ï¿½ï¿½Í»ï¿½ï¿½
 static void HTC_DelayUs(uint32_t us) {
     uint32_t delay = (SystemCoreClock / 1000000 / 4) * us; 
     while(delay--) { __NOP(); }
 }
 
-// StartÐÅºÅ
+// Startï¿½Åºï¿½
 static void TM1637_Start(void) {
     HTC_CLK(1); HTC_DIO(1); HTC_DelayUs(2);
     HTC_DIO(0); HTC_DelayUs(2); 
     HTC_CLK(0);
 }
 
-// StopÐÅºÅ
+// Stopï¿½Åºï¿½
 static void TM1637_Stop(void) {
     HTC_CLK(0); HTC_DelayUs(2);
     HTC_DIO(0); HTC_DelayUs(2);
@@ -31,14 +33,14 @@ static void TM1637_Stop(void) {
     HTC_DIO(1); 
 }
 
-// µÈ´ýACK
+// ï¿½È´ï¿½ACK
 static void TM1637_Ask(void) {
     HTC_CLK(0); HTC_DelayUs(5);
     HTC_CLK(1); HTC_DelayUs(2);
     HTC_CLK(0);
 }
 
-// Ð´Ò»¸ö×Ö½Ú
+// Ð´Ò»ï¿½ï¿½ï¿½Ö½ï¿½
 static void TM1637_Write_Byte(uint8_t dat) {
     uint8_t i;
     for(i = 0; i < 8; i++) {
@@ -51,30 +53,32 @@ static void TM1637_Write_Byte(uint8_t dat) {
     }
 }
 
-// ¶Á°´¼ü (ÄúµÄÔ­°æÂß¼­)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ß¼ï¿½)
 uint8_t BSP_HTC2K_ReadKeys(void) {
     uint8_t rekey = 0, i;
+    taskENTER_CRITICAL();
     TM1637_Start();
-    TM1637_Write_Byte(0x42); 
+    TM1637_Write_Byte(0x42);
     TM1637_Ask();
-    HTC_DIO(1); 
+    HTC_DIO(1);
     for(i = 0; i < 8; i++) {
         HTC_CLK(0);
-        rekey = rekey >> 1; 
+        rekey = rekey >> 1;
         HTC_DelayUs(10);
         HTC_CLK(1);
-        if(HTC_READ_DIO()) rekey |= 0x80; 
+        if(HTC_READ_DIO()) rekey |= 0x80;
         HTC_DelayUs(20);
     }
     TM1637_Ask();
     TM1637_Stop();
+    taskEXIT_CRITICAL();
     return rekey;
 }
 
-// ³õÊ¼»¯
+// ï¿½ï¿½Ê¼ï¿½ï¿½
 void BSP_HTC2K_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    __HAL_RCC_GPIOB_CLK_ENABLE(); // ¿ªÆôÊ±ÖÓ
+    __HAL_RCC_GPIOB_CLK_ENABLE(); // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     GPIO_InitStruct.Pin = HTC_CLK_PIN | HTC_DIO_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD; 
     GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -83,7 +87,7 @@ void BSP_HTC2K_Init(void) {
     HTC_CLK(1); HTC_DIO(1);
 }
 
-// ÏÔÊ¾¹¦ÄÜ (ÄúµÄÔ­°æºËÐÄËã·¨£¬Ö±½Ó¸´ÓÃ£¡)
+// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½Ö±ï¿½Ó¸ï¿½ï¿½Ã£ï¿½)
 void BSP_HTC2K_ShowTemp(float temp) {
     uint8_t byte0_icon, byte1_num, byte2_num, byte3_num;
     uint8_t d1, d2, d3; 
@@ -104,12 +108,13 @@ void BSP_HTC2K_ShowTemp(float temp) {
 
     byte2_num = SmgTab[d2] | 0x01; 
     byte3_num = SmgTab[d3];
-    if (temp < 0) byte3_num |= 0x01; // ¸öÎ»¿ØÖÆ¸ººÅ
+    if (temp < 0) byte3_num |= 0x01; // ï¿½ï¿½Î»ï¿½ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½
     
+    taskENTER_CRITICAL();
     TM1637_Start();
     TM1637_Write_Byte(0x40); TM1637_Ask();
     TM1637_Stop();
-    
+
     TM1637_Start();
     TM1637_Write_Byte(0xC0); TM1637_Ask();
     TM1637_Write_Byte(byte0_icon); TM1637_Ask();
@@ -117,10 +122,11 @@ void BSP_HTC2K_ShowTemp(float temp) {
     TM1637_Write_Byte(byte2_num); TM1637_Ask();
     TM1637_Write_Byte(byte3_num); TM1637_Ask();
     TM1637_Stop();
-    
+
     TM1637_Start();
-    TM1637_Write_Byte(0x8C); TM1637_Ask();
+    TM1637_Write_Byte(0x8F); TM1637_Ask();
     TM1637_Stop();
+    taskEXIT_CRITICAL();
 }
 
 
