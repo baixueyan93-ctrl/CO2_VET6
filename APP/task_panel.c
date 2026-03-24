@@ -2,43 +2,47 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "bsp_htc_2k.h"
-#include "sys_state.h"   // ¡¾ÐÂÔö¡¿ÒýÈëÏµÍ³ºÚ°å
-#include "sys_config.h"  // ¡¾ÐÂÔö¡¿ÒýÈë²ÎÊýÅäÖÃ (°üº¬³ÙÖÍ²ÎÊý C_TEMP_HYST_C1)
+#include "sys_state.h"   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ú°ï¿½
+#include "sys_config.h"  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í²ï¿½ï¿½ï¿½ C_TEMP_HYST_C1)
 
-float g_env_temp  = -5.0f;   // ÔËÐÐÊ±µÄÕæÊµ»·¾³ÎÂ¶È
-float g_set_limit = -5.0f;   // Ä¬ÈÏÉè¶¨ãÐÖµ
-uint8_t g_mode    = 0;       // 0: ¼à¿ØÄ£Ê½, 1: ÉèÖÃÄ£Ê½
+float g_env_temp  = -5.0f;   // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
+float g_set_limit = -5.0f;   // Ä¬ï¿½ï¿½ï¿½è¶¨ï¿½ï¿½Öµ
+uint8_t g_mode    = 0;       // 0: ï¿½ï¿½ï¿½Ä£Ê½, 1: ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+
+static float    s_last_disp_temp = -999.0f;  // ä¸Šæ¬¡æ˜¾ç¤ºçš„æ¸©åº¦
+static uint8_t  s_last_disp_icon = 0xFF;     // ä¸Šæ¬¡æ˜¾ç¤ºçš„å›¾æ ‡
 
 void Task_Panel_Process(void const *argument) {
     uint8_t key_val = 0;
     
-    // 1. Ó²¼þ³õÊ¼»¯
+    // 1. Ó²ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
     BSP_HTC2K_Init();
     
-    // 2. ½øÈë RTOS ¶ÀÁ¢Ïß³ÌËÀÑ­»·
+    // 2. ï¿½ï¿½ï¿½ï¿½ RTOS ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½
     for(;;) {
-        // ================= ¡¾ÎÊÌâ3ÐÞ¸´¡¿È¥ºÚ°åÉÏ³­ÕæÊµÎÂ¶È =================
+        // ================= ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½Þ¸ï¿½ï¿½ï¿½È¥ï¿½Ú°ï¿½ï¿½Ï³ï¿½ï¿½ï¿½Êµï¿½Â¶ï¿½ =================
         SysVarData_t sensor_data;
         SysState_GetSensor(&sensor_data);
-        g_env_temp = sensor_data.VAR_CABINET_TEMP; // ÄÃµ½ 10K µÄÕæÊµÕô·¢Æ÷ÎÂ¶È£¡
+        g_env_temp = sensor_data.VAR_CABINET_TEMP; // ï¿½Ãµï¿½ 10K ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¶È£ï¿½
         
-        // ================= ÈÎÎñ1£º°´¼ü´¦Àí =================
+        // ================= ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ =================
         key_val = BSP_HTC2K_ReadKeys();
         
         if (key_val != 0x00 && key_val != 0xFF) {
             
-            // --- [Set¼ü] ÇÐ»» ÉèÖÃ/¼à¿Ø Ä£Ê½ ---
+            // --- [Setï¿½ï¿½] ï¿½Ð»ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ Ä£Ê½ ---
             if (key_val == KEY_CODE_SET) {
                 if (g_mode == 0) {
-                    g_mode = 1; 
-                    g_IconSet.bits.Set = 1; 
+                    g_mode = 1;
+                    g_IconSet.bits.Set = 1;
                 } else {
-                    g_mode = 0; 
-                    g_IconSet.bits.Set = 0; 
+                    g_mode = 0;
+                    g_IconSet.bits.Set = 0;
                 }
+                s_last_disp_temp = -999.0f; // å¼ºåˆ¶åˆ·æ–°
             }
             
-            // --- [ÉÏ/ÏÂ¼ü] ½öÔÚÉèÖÃÄ£Ê½ÓÐÐ§ ---
+            // --- [ï¿½ï¿½/ï¿½Â¼ï¿½] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½Ð§ ---
             if (g_mode == 1) {
                 if (key_val == KEY_CODE_UP)   g_set_limit += 0.5f; 
                 if (key_val == KEY_CODE_DOWN) g_set_limit -= 0.5f; 
@@ -46,21 +50,22 @@ void Task_Panel_Process(void const *argument) {
                 if(g_set_limit < -30.0f) g_set_limit = -30.0f;
             }
             
-            // --- [Rst¼ü] »Ö¸´³ö³§ÉèÖÃ ---
+            // --- [Rstï¿½ï¿½] ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---
             if (key_val == KEY_CODE_RST) {
-                g_mode = 0; 
+                g_mode = 0;
                 g_IconSet.bits.Set = 0;
-                g_set_limit = -5.0f; 
+                g_set_limit = -5.0f;
+                s_last_disp_temp = -999.0f; // å¼ºåˆ¶åˆ·æ–°
             }
             
-            // ·À°´¼ü¶¶¶¯ÑÓÊ±
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±
             vTaskDelay(pdMS_TO_TICKS(200)); 
         }
 
-        // ================= ÈÎÎñ2£ºÏÔÊ¾Óë¿ØÖÆÍ¼±ê =================
+        // ================= ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ =================
         if (g_mode == 0) {
-            // [¼à¿ØÄ£Ê½] Í¼±ê¿ØÖÆÂß¼­
-            // ¡¾ÎÊÌâ13ÐÞ¸´¡¿£º¼ÓÈë³ÙÖÍËã·¨£¡·ÀÖ¹¼ÌµçÆ÷Æµ·±¡°°Éàª¡±Ïì
+            // [ï¿½ï¿½ï¿½Ä£Ê½] Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½13ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½Ìµï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½àª¡ï¿½ï¿½ï¿½
             if (g_env_temp > (g_set_limit + SET_TEMP_HYST_C1)) {
                 g_IconSet.bits.Ref = 1;  
                 g_IconSet.bits.Fan = 1;  
@@ -70,10 +75,20 @@ void Task_Panel_Process(void const *argument) {
                 g_IconSet.bits.Fan = 0;
                 g_IconSet.bits.Heat = 1; 
             }
-            BSP_HTC2K_ShowTemp(g_env_temp);
+            float cur = g_env_temp;
+            if (cur != s_last_disp_temp || g_IconSet.byte != s_last_disp_icon) {
+                BSP_HTC2K_ShowTemp(cur);
+                s_last_disp_temp = cur;
+                s_last_disp_icon = g_IconSet.byte;
+            }
         } else {
-            // [ÉèÖÃÄ£Ê½] 
-            BSP_HTC2K_ShowTemp(g_set_limit); 
+            // [ï¿½ï¿½ï¿½ï¿½Ä£Ê½]
+            float cur = g_set_limit;
+            if (cur != s_last_disp_temp || g_IconSet.byte != s_last_disp_icon) {
+                BSP_HTC2K_ShowTemp(cur);
+                s_last_disp_temp = cur;
+                s_last_disp_icon = g_IconSet.byte;
+            }
         }
 
         vTaskDelay(pdMS_TO_TICKS(50));
