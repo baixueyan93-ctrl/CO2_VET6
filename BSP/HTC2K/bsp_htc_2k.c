@@ -11,6 +11,11 @@ const uint8_t SmgTab[] = {
 
 icon_type_t g_IconSet = {0};
 
+uint8_t Bai = 0;
+uint8_t Shi = 0;
+uint8_t Ge  = 0;
+sys_flag_type_t sys_flag_t = {0};
+
 // 微秒延时（volatile防止编译器优化掉循环）
 static void HTC_DelayUs(volatile uint32_t us) {
     volatile uint32_t delay = (SystemCoreClock / 1000000 / 4) * us;
@@ -146,44 +151,43 @@ void BSP_HTC2K_TestDisplay(void) {
     TM1637_Stop();
 }
 
-// 显示温度
-void BSP_HTC2K_ShowTemp(float temp) {
-    uint8_t byte0_icon, byte1_num, byte2_num, byte3_num;
-    uint8_t d1, d2, d3;
-
-    if(temp < -99.9f) temp = -99.9f;
-    if(temp > 99.9f) temp = 99.9f;
-
-    int val = (int)(temp * 10);
-    if (val < 0) val = -val;
-
-    d1 = val / 100;
-    d2 = (val / 10) % 10;
-    d3 = val % 10;
-
-    byte0_icon = g_IconSet.byte;
-    byte1_num = SmgTab[d1];
-    if (byte1_num == 0xFC && val < 100) byte1_num = 0x00;
-
-    byte2_num = SmgTab[d2] | 0x01;
-    byte3_num = SmgTab[d3];
-    if (temp < 0) byte3_num |= 0x01;
+// 纯显示：把 Bai/Shi/Ge 发给 TM1637（与原始 TM1637_display 一致）
+void BSP_HTC2K_Display(void) {
+    uint8_t Icon = g_IconSet.byte;
 
     taskENTER_CRITICAL();
     TM1637_Start();
-    TM1637_Write_Byte(0x40); TM1637_Ask();
+    TM1637_Write_Byte(0x40);
+    TM1637_Ask();
     TM1637_Stop();
 
     TM1637_Start();
-    TM1637_Write_Byte(0xC0); TM1637_Ask();
-    TM1637_Write_Byte(byte0_icon); TM1637_Ask();
-    TM1637_Write_Byte(byte1_num); TM1637_Ask();
-    TM1637_Write_Byte(byte2_num); TM1637_Ask();
-    TM1637_Write_Byte(byte3_num); TM1637_Ask();
+    TM1637_Write_Byte(0xC0);
+    TM1637_Ask();
+
+    TM1637_Write_Byte(Icon);
+    TM1637_Ask();
+
+    TM1637_Write_Byte(SmgTab[Bai]);
+    TM1637_Ask();
+
+    if (sys_flag_t.idot)
+        TM1637_Write_Byte(SmgTab[Shi] | 0x01);
+    else
+        TM1637_Write_Byte(SmgTab[Shi]);
+    TM1637_Ask();
+
+    if (sys_flag_t.FuHao)
+        TM1637_Write_Byte(SmgTab[Ge] | 0x01);
+    else
+        TM1637_Write_Byte(SmgTab[Ge]);
+    TM1637_Ask();
+
     TM1637_Stop();
 
     TM1637_Start();
-    TM1637_Write_Byte(0x8F); TM1637_Ask();
+    TM1637_Write_Byte(0x8C);   // 亮度与原始一致（脉冲 11/16）
+    TM1637_Ask();
     TM1637_Stop();
     taskEXIT_CRITICAL();
 }

@@ -30,18 +30,48 @@ typedef union {
     icon_bits_t  bits;
 } icon_type_t;
 
-extern icon_type_t g_IconSet; 
+extern icon_type_t g_IconSet;
 
-// ������ֵ���� (����ԭ���� main.c �Ƶ�����)
-#define KEY_CODE_SET   0xF4  
-#define KEY_CODE_UP    0xF5  
-#define KEY_CODE_DOWN  0xF6  
-#define KEY_CODE_RST   0xF7  
+// 显示数据：外部直接赋值（与原始 TM1637.C 一致）
+extern uint8_t Bai;   // 百位（段码表索引）
+extern uint8_t Shi;   // 十位（段码表索引）
+extern uint8_t Ge;    // 个位（段码表索引）
 
-// ��������
+// 显示标志
+typedef struct {
+    uint8_t idot  : 1;  // 十位小数点（GRID3 最低位）
+    uint8_t FuHao : 1;  // 个位负号点（GRID4 最低位）
+} sys_flag_type_t;
+
+extern sys_flag_type_t sys_flag_t;
+
+// 段码表索引定义（字母/符号）
+#define ZM_A          10
+#define ZM_b          11
+#define ZM_C          12
+#define ZM_d          13
+#define ZM_E          14
+#define ZM_F          15
+#define ZM_H          16
+#define ZM_L          17
+#define ZM_o          18
+#define ZM_P          19
+#define ZM_r          20
+#define ZM_t          21
+#define ZM_U          22
+#define ZM_FH         23
+#define ZM_NULL       24
+
+// 按键值定义
+#define KEY_CODE_SET   0xF4
+#define KEY_CODE_UP    0xF5
+#define KEY_CODE_DOWN  0xF6
+#define KEY_CODE_RST   0xF7
+
+// 函数声明
 void BSP_HTC2K_Init(void);
-void BSP_HTC2K_TestDisplay(void);    // 开机自检：全亮"888"
-void BSP_HTC2K_ShowTemp(float temp);
+void BSP_HTC2K_TestDisplay(void);
+void BSP_HTC2K_Display(void);       // 纯显示：把 Bai/Shi/Ge 发给 TM1637
 uint8_t BSP_HTC2K_ReadKeys(void);    
 
 #endif

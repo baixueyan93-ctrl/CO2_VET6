@@ -67,33 +67,48 @@ void Task_Panel_Process(void const *argument) {
             vTaskDelay(pdMS_TO_TICKS(200)); 
         }
 
-        // ================= ����2����ʾ�����ͼ�� =================
-        if (g_mode == 0) {
-            // [���ģʽ] ͼ������߼�
-            // ������13�޸�������������㷨����ֹ�̵���Ƶ������ડ���
-            if (g_env_temp > (g_set_limit + SET_TEMP_HYST_C1)) {
-                g_IconSet.bits.Ref = 1;  
-                g_IconSet.bits.Fan = 1;  
-                g_IconSet.bits.Heat = 0; 
-            } else if (g_env_temp < (g_set_limit - SET_TEMP_HYST_C1)) {
-                g_IconSet.bits.Ref = 0;
-                g_IconSet.bits.Fan = 0;
-                g_IconSet.bits.Heat = 1; 
+        // ================= 部分2：显示数值和图标 =================
+        {
+            float disp_val;
+            if (g_mode == 0) {
+                // [显示模式] 图标控制逻辑
+                if (g_env_temp > (g_set_limit + SET_TEMP_HYST_C1)) {
+                    g_IconSet.bits.Ref = 1;
+                    g_IconSet.bits.Fan = 1;
+                    g_IconSet.bits.Heat = 0;
+                } else if (g_env_temp < (g_set_limit - SET_TEMP_HYST_C1)) {
+                    g_IconSet.bits.Ref = 0;
+                    g_IconSet.bits.Fan = 0;
+                    g_IconSet.bits.Heat = 1;
+                }
+                disp_val = g_env_temp;
+            } else {
+                // [设定模式]
+                disp_val = g_set_limit;
             }
-            float cur = g_env_temp;
-            if (cur != s_last_disp_temp || g_IconSet.byte != s_last_disp_icon) {
-                BSP_HTC2K_ShowTemp(cur);
-                s_last_disp_temp = cur;
-                s_last_disp_icon = g_IconSet.byte;
+
+            // 温度拆分为 Bai/Shi/Ge（与原始逻辑一致）
+            if (disp_val < -99.9f) disp_val = -99.9f;
+            if (disp_val > 99.9f)  disp_val = 99.9f;
+
+            int val = (int)(disp_val * 10);
+            if (val < 0) {
+                sys_flag_t.FuHao = 1;
+                val = -val;
+            } else {
+                sys_flag_t.FuHao = 0;
             }
-        } else {
-            // [����ģʽ]
-            float cur = g_set_limit;
-            if (cur != s_last_disp_temp || g_IconSet.byte != s_last_disp_icon) {
-                BSP_HTC2K_ShowTemp(cur);
-                s_last_disp_temp = cur;
-                s_last_disp_icon = g_IconSet.byte;
-            }
+
+            Bai = val / 100;
+            Shi = (val / 10) % 10;
+            Ge  = val % 10;
+
+            // 百位为0时消隐
+            if (Bai == 0 && val < 100) Bai = ZM_NULL;
+
+            sys_flag_t.idot = 1;  // 始终显示小数点
+
+            BSP_HTC2K_Display();
         }
 
         vTaskDelay(pdMS_TO_TICKS(50));
