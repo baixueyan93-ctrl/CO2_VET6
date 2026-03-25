@@ -1,9 +1,9 @@
 #ifndef __BSP_HTC_2K_H
 #define __BSP_HTC_2K_H
 
-#include "main.h" // ÒýÈë HAL ¿â
+#include "main.h" // ï¿½ï¿½ï¿½ï¿½ HAL ï¿½ï¿½
 
-// Ó²¼þÒý½Å¶¨Òå (±£ÁôÄúµÄ PB6 ºÍ PB7)
+// Ó²ï¿½ï¿½ï¿½ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ PB6 ï¿½ï¿½ PB7)
 #define HTC_CLK_PORT    GPIOB
 #define HTC_CLK_PIN     GPIO_PIN_6
 #define HTC_DIO_PORT    GPIOB
@@ -13,7 +13,7 @@
 #define HTC_DIO(x)      HAL_GPIO_WritePin(HTC_DIO_PORT, HTC_DIO_PIN, (x)?GPIO_PIN_SET:GPIO_PIN_RESET)
 #define HTC_READ_DIO()  HAL_GPIO_ReadPin(HTC_DIO_PORT, HTC_DIO_PIN)
 
-// Í¼±ê¿ØÖÆ½á¹¹Ìå (ÍêÃÀ±£Áô)
+// Í¼ï¿½ï¿½ï¿½ï¿½Æ½á¹¹ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 typedef struct {
     uint8_t Clock   : 1; 
     uint8_t Light   : 1; 
@@ -32,15 +32,16 @@ typedef union {
 
 extern icon_type_t g_IconSet; 
 
-// °´¼ü¼üÖµ¶¨Òå (´ÓÄúÔ­À´µÄ main.c ÒÆµ½ÕâÀï)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ main.c ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½)
 #define KEY_CODE_SET   0xF4  
 #define KEY_CODE_UP    0xF5  
 #define KEY_CODE_DOWN  0xF6  
 #define KEY_CODE_RST   0xF7  
 
-// º¯ÊýÉùÃ÷
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void BSP_HTC2K_Init(void);
-void BSP_HTC2K_ShowTemp(float temp); 
+void BSP_HTC2K_TestDisplay(void);    // å¼€æœºè‡ªæ£€ï¼šå…¨äº®"888"
+void BSP_HTC2K_ShowTemp(float temp);
 uint8_t BSP_HTC2K_ReadKeys(void);    
 
 #endif

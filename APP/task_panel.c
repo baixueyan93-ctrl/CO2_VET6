@@ -15,10 +15,15 @@ static uint8_t  s_last_disp_icon = 0xFF;     // 上次显示的图标
 void Task_Panel_Process(void const *argument) {
     uint8_t key_val = 0;
     
-    // 1. Ӳ����ʼ��
+    // 1. 硬件初始化
     BSP_HTC2K_Init();
-    
-    // 2. ���� RTOS �����߳���ѭ��
+    vTaskDelay(pdMS_TO_TICKS(100));  // 等TM1637上电稳定
+
+    // ★ 开机自检：强制全亮显示 "888"，持续2秒
+    BSP_HTC2K_TestDisplay();
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
+    // 2. 进入 RTOS 主线程大循环
     for(;;) {
         // ================= ������3�޸���ȥ�ڰ��ϳ���ʵ�¶� =================
         SysVarData_t sensor_data;
