@@ -38,9 +38,10 @@ static void TM1637_Stop(void) {
     HTC_DIO(1);
 }
 
-// ACK: 第9个时钟（忽略TM1637的应答，与原始代码一致）
+// ACK: 第9个时钟（开漏模式下释放DIO，让TM1637拉低应答）
 static void TM1637_Ask(void) {
     HTC_CLK(0);
+    HTC_DIO(1);    // 释放DIO，TM1637会拉低作为ACK
     HTC_DelayUs(5);
     HTC_CLK(1);
     HTC_DelayUs(2);
@@ -63,32 +64,15 @@ static void TM1637_Write_Byte(uint8_t dat) {
     }
 }
 
-// DIO方向切换（推挽模式下读按键需要）
-static void HTC_DIO_SetInput(void) {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = HTC_DIO_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(HTC_DIO_PORT, &GPIO_InitStruct);
-}
-
-static void HTC_DIO_SetOutput(void) {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = HTC_DIO_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(HTC_DIO_PORT, &GPIO_InitStruct);
-}
-
-// 按键扫描
+// 按键扫描（开漏模式：写1即释放总线，可直接读取，无需切换GPIO方向）
 uint8_t BSP_HTC2K_ReadKeys(void) {
     uint8_t rekey = 0, i;
     taskENTER_CRITICAL();
     TM1637_Start();
     TM1637_Write_Byte(0x42);
     TM1637_Ask();
-    HTC_DIO_SetInput();
+    HTC_DIO(1);  // 释放DIO，让TM1637驱动数据
+
     for(i = 0; i < 8; i++) {
         HTC_CLK(0);
         rekey = rekey >> 1;
@@ -97,20 +81,19 @@ uint8_t BSP_HTC2K_ReadKeys(void) {
         if(HTC_READ_DIO()) rekey |= 0x80;
         HTC_DelayUs(20);
     }
-    HTC_DIO_SetOutput();
     TM1637_Ask();
     TM1637_Stop();
     taskEXIT_CRITICAL();
     return rekey;
 }
 
-// 初始化
+// 初始化（★关键：必须用开漏+上拉，TM1637是开漏总线协议）
 void BSP_HTC2K_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     __HAL_RCC_GPIOB_CLK_ENABLE();
     GPIO_InitStruct.Pin = HTC_CLK_PIN | HTC_DIO_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;   // 开漏输出
+    GPIO_InitStruct.Pull = GPIO_PULLUP;            // 内部上拉
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(HTC_CLK_PORT, &GPIO_InitStruct);
     HTC_CLK(1);
