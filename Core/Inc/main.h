@@ -66,6 +66,16 @@ void Error_Handler(void);
 #define RS485_DIR_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 
+/* EXV0 电子膨胀阀 步进电机引脚 (鹭宫 VKV DC12V) */
+#define EXV0_PM0A_Pin       GPIO_PIN_11   /* PM0A = B-  */
+#define EXV0_PM0A_GPIO_Port GPIOD
+#define EXV0_PM0B_Pin       GPIO_PIN_10   /* PM0B = A-  */
+#define EXV0_PM0B_GPIO_Port GPIOD
+#define EXV0_PM0C_Pin       GPIO_PIN_9    /* PM0C = B+  */
+#define EXV0_PM0C_GPIO_Port GPIOD
+#define EXV0_PM0D_Pin       GPIO_PIN_8    /* PM0D = A+  */
+#define EXV0_PM0D_GPIO_Port GPIOD
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

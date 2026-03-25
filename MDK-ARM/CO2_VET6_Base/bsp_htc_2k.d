@@ -39,3 +39,12 @@ co2_vet6_base\bsp_htc_2k.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rt
 co2_vet6_base\bsp_htc_2k.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 co2_vet6_base\bsp_htc_2k.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 co2_vet6_base\bsp_htc_2k.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+co2_vet6_base\bsp_htc_2k.o: ../Core/Inc/FreeRTOSConfig.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+co2_vet6_base\bsp_htc_2k.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
